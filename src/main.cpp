@@ -4,7 +4,8 @@
 
 void setup()
 {
-  msginit();
+  // Starta a serial
+  msgInit();
 
   // configura saídas
   pinMode(OUT1,OUTPUT);

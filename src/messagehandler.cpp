@@ -3,7 +3,8 @@
 #include "lrc.h"
 #include "messagehandler.h"
 
-void msginit(){
+void msgInit()
+{
     Serial.begin(9600);
     Serial.println("Sistema Inciado.");
 }

@@ -39,7 +39,7 @@
 #define AON1 6
 
 void msgHandler();
-void msginit();
+void msgInit();
 
 // void static funcao
 // estas nao sao visiveis para os outros modulos

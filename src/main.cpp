@@ -4,7 +4,7 @@
 
 void setup()
 {
-  void msginit();
+  msginit();
 
   // configura saídas
   pinMode(OUT1,OUTPUT);

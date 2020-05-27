@@ -1,0 +1,112 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <script src="/socket.io/socket.io.js"></script>
+
+        <script>
+            var socket = io();
+
+            socket.on('retorno', function([id, operacao, estado]){ 
+                console.log("id: ", id, " operacao: ", operacao, " estado: ", estado[0]+estado[1]+estado[2]+estado[3]);
+                if(operacao == 1){
+                    document.getElementById("saida"+ id).value = estado;
+                }
+                if(operacao == 2){
+                    document.getElementById("entrada"+ id).value = estado;
+                }
+                if(operacao == 6){
+                    document.getElementById("analogica"+ id).value = estado[0]+estado[1]+estado[2]+estado[3];
+                }
+                
+            });
+
+            function LeSaida(x)
+            {         
+                socket.emit('state', ['01', '0'+ x, '0000'] );
+                console.log('Lendo saida digital '+ x);
+            }
+
+            function LeEntrada(x)
+            {         
+                socket.emit('state', ['02', '0'+ x, '0000'] );
+                console.log('Lendo entrada digital '+ x);
+            }
+
+            function turnOn(x)
+            {         
+                console.log(x);
+                socket.emit('state', ['05', '0'+ x, 'FF00'] );
+                console.log('Ligando saida '+ x);
+            }
+
+            function turnOff(x)
+            {         
+                socket.emit('state', ['05', '0'+ x, '0000'] );
+                console.log('Desligando saida '+ x);
+            }
+
+            function EntradaAnalog(x)
+            {         
+                socket.emit('state', ['06', '0'+ x, '0000'] );
+                console.log('Lendo entrada analogica '+ x);
+            }
+
+            function atualizaPWM()
+            {
+                var novoPWM = document.getElementById("valorPWM").value;
+                if(novoPWM > 0 && novoPWM < 100)
+                {
+                    socket.emit('state', ['07', '01', '00' + novoPWM] );
+                    console.log('Novo valor PWM '+ novoPWM);
+                }
+                else if(novoPWM < 256)
+                {
+                    socket.emit('state', ['07', '01', '0' + novoPWM] );
+                    console.log('Novo valor PWM '+ novoPWM);
+                }
+
+                else
+                    console.log('Valor PWM invalido');
+            }
+        </script>
+    </head>
+
+    <body>
+        <h1>Node.js SCADA</h1>
+
+        Ler estado atual das Entradas Digitais 
+        <br> Entrada 1:  <input type="text" size="20" value="Desligado" disabled="disabled" id="entrada1"> <button onclick="LeEntrada(1)">Ler Entrada 1</button> 
+        <br> Entrada 2:  <input type="text" size="20" value="Desligado" disabled="disabled" id="entrada2"> <button onclick="LeEntrada(2)">Ler Entrada 2</button>
+        <br> Entrada 3:  <input type="text" size="20" value="Desligado" disabled="disabled" id="entrada3"> <button onclick="LeEntrada(3)">Ler Entrada 3</button>
+        <br> Entrada 4:  <input type="text" size="20" value="Desligado" disabled="disabled" id="entrada4"> <button onclick="LeEntrada(4)">Ler Entrada 4</button>
+        <br>
+        <br>
+
+        Ler estado atual das Entradas Analogicas 
+        <br> Entrada Analogica 1: <input type="text" size="20" value="0" disabled="disabled" id="analogica1"> <button onclick="EntradaAnalog(1)">Ler Entrada 1</button> 
+        <br> Entrada Analogica 2: <input type="text" size="20" value="0" disabled="disabled" id="analogica2"> <button onclick="EntradaAnalog(2)">Ler Entrada 2</button>
+        <br> Entrada Analogica 3: <input type="text" size="20" value="0" disabled="disabled" id="analogica3"> <button onclick="EntradaAnalog(3)">Ler Entrada 3</button>
+        <br> Entrada Analogica 4: <input type="text" size="20" value="0" disabled="disabled" id="analogica4"> <button onclick="EntradaAnalog(4)">Ler Entrada 4</button>
+        <br>
+        <br>
+
+        Ligar/Desligar Saidas
+        <br> Saida 1: <button onclick="turnOn(1)">Ligar</button> <button onclick="turnOff(1)">Desligar</button> 
+        <br> Saida 2: <button onclick="turnOn(2)">Ligar</button> <button onclick="turnOff(2)">Desligar</button>
+        <br> Saida 3: <button onclick="turnOn(3)">Ligar</button> <button onclick="turnOff(3)">Desligar</button>
+        <br> Saida 4: <button onclick="turnOn(4)">Ligar</button> <button onclick="turnOff(4)">Desligar</button>
+        <br>
+        <br>
+
+        Ler estado atual das Saidas Digitais 
+        <br> Saida 1: <input type="text" size="20" value="Desligado" disabled="disabled" id="saida1"> <button onclick="LeSaida(1)">Ler Saida 1</button> 
+        <br> Saida 2: <input type="text" size="20" value="Desligado" disabled="disabled" id="saida2"> <button onclick="LeSaida(2)">Ler Saida 2</button>
+        <br> Saida 3: <input type="text" size="20" value="Desligado" disabled="disabled" id="saida3"> <button onclick="LeSaida(3)">Ler Saida 3</button>
+        <br> Saida 4: <input type="text" size="20" value="Desligado" disabled="disabled" id="saida4"> <button onclick="LeSaida(4)">Ler Saida 4</button>
+        <br>
+        <br>
+        Escrever valor na saida analogica
+        <br> Saida Analogica 1: <input type="text" size="20" id = "valorPWM"> <button onclick="atualizaPWM()">Modificar Saida</button>
+
+    </body>
+</html>

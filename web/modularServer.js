@@ -3,11 +3,22 @@
 // modulos
 var http = require('http')
 var   fs = require('fs');
+
 // porta
 const port = 3000
+
 // pagina principal
 const mainPage = 'index.html'
 const myStyle  = 'style.css'
+
+function define_estado(data) {//EBONE
+  if((data[28] && data[29]) == 'F'){
+    return [data[27], data[25], 'Ligado'];
+  }
+  if((data[28] && data[29]) == '0'){
+    return [data[27], data[25], 'Desligado'];
+  }
+}
 
 /*---- Converte String para ArrayBUffer -----*/
 var convertStringToArrayBuffer = function (str) {
@@ -15,60 +26,69 @@ var convertStringToArrayBuffer = function (str) {
   var bufView = new Uint8Array(buf);
   for (var i = 0; i < str.length; i++) {
       bufView[i] = str.charCodeAt(i);
-  //console.log(bufView[i]);
   }
-//console.log(buf);
   return buf;
 }
 
 /*---- soma dois valores somente com operadores binários -----*/
 function somabin(a, b){
-var uncommonBits = a ^ b;
-var commonBits = a & b;
+  var uncommonBits = a ^ b;
+  var commonBits = a & b;
 
-if(commonBits == 0)
-  return uncommonBits
+  if(commonBits == 0)
+    return uncommonBits
 
-return somabin(uncommonBits, (commonBits << 1));
+  return somabin(uncommonBits, (commonBits << 1));
 }
 
 /*---- Converte string hexadecimal para ascii -----*/
 function hex_to_ascii(str1)
 {
-var hex  = str1.toString();
-var str = '';
-for (var n = 0; n < hex.length; n += 2) {
-  str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
+  var hex  = str1.toString();
+  var str = '';
+  for (var n = 0; n < hex.length; n += 2) {
+    str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
+  }
+  return str;
 }
-return str;
+
+/*---- Da um delay na função que à chama (usar await, em uma async) ----*/
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
+/*
+EXEMPLO DE CHAMADA:
+async function later()
+	{
+		await sleep(3000);
+		socket.emit('conrai2', [slaveOut, global2]);
+		global2 = '';
+	}
+*/
 
 /*---- Calcula LRC -----*/
 function calculateLRC(str) {
   var buffer = convertStringToArrayBuffer(str);
-var testeray = new Uint8Array(Buffer.from(buffer));
-//console.log(testeray);//mostra em hexadecimal
+  var testeray = new Uint8Array(Buffer.from(buffer));
 
   var lrc = 0;
-var exant = 0;
+  var exant = 0;
+
   for (var i = 0; i < str.length; i++) {
-  var ex = hex_to_ascii(testeray[i].toString(16));
-  if(i%2!=0){
-    var duex = exant.concat('',ex);
-    //console.log(duex);
-    var decim = parseInt(duex, 16);
-    //console.log(decim);
-    lrc += decim & 0xFF;
-    //console.log(lrc);
-  }
+    var ex = hex_to_ascii(testeray[i].toString(16));
+    if(i%2!=0){
+      var duex = exant.concat('',ex);
+      var decim = parseInt(duex, 16);
+      lrc += decim & 0xFF;
+    }
 
-  //console.log(lrc);
-  exant = ex;
+    exant = ex;
   }
-lrc = (somabin((lrc ^ 0xFF), 1) & 0xFF);
-//console.log(lrc);
+  lrc = (somabin((lrc ^ 0xFF), 1) & 0xFF);
 
-  return lrc;
+    return lrc;
 }
 
 // servidor ouvindo em 'port'
@@ -96,6 +116,66 @@ var flag = 0;
 var incremento = 1;
 
 socket.on('connection', function(client) {
+  client.on('state', function(writeData){
+      console.log('NODEJS: Setado ' + writeData);
+  slaveCmd = writeData[0]
+  slaveOut = writeData[1] //porta: 01 / 02 / 03 / 04
+      slaveState = writeData[2] //estado: FF00 / 0000 / ...
+  var mensagem = ':'+slaveAdr+slaveCmd+slaveOut+slaveState;
+  msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();
+  var mensagemplrc = ':'+slaveAdr+slaveCmd+slaveOut+slaveState+msglrc;
+  sPort.write(mensagemplrc)
+  //nada a emitir...
+  })
+
+client.on('conrdi', function(RDI){
+  console.log('NODEJS: Lido Digital ' + RDI);
+  slaveCmd = RDI[0]
+  slaveOut = RDI[1] //porta: 01 / 02 / 03 / 04
+      slaveState = RDI[2] //estado: FF00 / 0000 / ...
+  var mensagem = ':'+slaveAdr+slaveCmd+slaveOut+slaveState;
+  msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();
+  var mensagemplrc = ':'+slaveAdr+slaveCmd+slaveOut+slaveState+msglrc;
+  sPort.write(mensagemplrc)
+  socket.emit('conrdi2', [slaveOut, global]);
+  global = '';
+})
+
+client.on('conrdo', function(RDO){
+  console.log('NODEJS: Lido Digital ' + RDO);
+  slaveCmd = RDO[0]
+  slaveOut = RDO[1] //porta: 01 / 02 / 03 / 04
+      slaveState = RDO[2] //estado: FF00 / 0000 / ...
+  var mensagem = ':'+slaveAdr+slaveCmd+slaveOut+slaveState;
+  msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();
+  var mensagemplrc = ':'+slaveAdr+slaveCmd+slaveOut+slaveState+msglrc;
+  sPort.write(mensagemplrc)
+  socket.emit('conrdo2', [slaveOut, global]);
+  global = '';
+})
+
+client.on('conrai', function(RAI){
+  console.log('NODEJS: Lido Analog ' + RAI);
+  slaveCmd = RAI[0]
+  slaveOut = RAI[1] //porta: 01 / 02 / 03 / 04
+      slaveState = RAI[2] //estado: FF00 / 0000 / ...
+  var mensagem = ':'+slaveAdr+slaveCmd+slaveOut+slaveState;
+  msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();
+  var mensagemplrc = ':'+slaveAdr+slaveCmd+slaveOut+slaveState+msglrc;
+  sPort.write(mensagemplrc)
+  later();
+})
+
+async function later()
+{
+  await sleep(3000);
+  socket.emit('conrai2', [slaveOut, global2]);
+  global2 = '';
+}
+})
+
+/*
+socket.on('connection', function(client) {
     client.on('state', function(data){
         console.log('Valor de tempo recebido do HTML:' + data);
         slaveCmd = data[0]
@@ -114,8 +194,8 @@ function LRC(str)
   var aux = [];
   var lrc = 0;
 
-
-  /* ----- Transformando em hexadecimal ----- */
+*/
+  /* ----- Transformando em hexadecimal ----- *//*
   for (var i = 1; i < str.length; i+=2) 
   { 
     if (str[i] > '9' && str[i+1] > '9')
@@ -148,21 +228,26 @@ function LRC(str)
 
   return lrc;
 }
+*/
 
 /*****   Porta Serial *****/
 const SerialPort = require('serialport');
 const Readline = SerialPort.parsers.Readline;
-const sPort = new SerialPort('com3', {
+const sPort = new SerialPort('com7', {
   baudRate: 9600
 })
 const parser = new Readline();
 sPort.pipe(parser);
 
-var slaveAdr = '03';
-var slaveCmd = '05';
-var slaveOut = '01';
+var global = '';
+var global2 = '0';
+var slaveAdr = '00';
+var slaveCmd = '1';
+var slavePType = 'D';
 var slaveState = '0000';
-var mensagem = ':' + slaveAdr + slaveCmd + slaveOut + slaveState;
+var msglrc = '00';
+var flag = 0;
+var mensagem = ':' + slaveAdr + slaveCmd + slavePType + slaveState;
 
 sPort.open(function (err) {
   if(err) {
@@ -174,6 +259,21 @@ sPort.open(function (err) {
 parser.on('data', (data) => {
   var new_data = data.split('');
   console.log(data);
+  var msgarray = data.split(':');//string to char array
+  var wordarray = '';
+  if(msgarray[3]){
+	  var aux = msgarray[3];
+	  var wordarray = aux.split('');
+  }
+  if(wordarray[6] == 'F' && wordarray[7] == 'F'){
+	  global = 'Ligada';
+  }else if(wordarray[6] == '0' && wordarray[7] == '0'){
+	  global = 'Desligada';
+  }
+  if(wordarray){
+	  global2 = wordarray[6]+wordarray[7]+wordarray[8]+wordarray[9];
+  }
+  /*
   if(new_data[21] == ':'){
     if((new_data[24] == '0') && (new_data[25] == '1')){
       socket.emit('retorno', define_estado(new_data));
@@ -185,15 +285,9 @@ parser.on('data', (data) => {
       socket.emit('retorno', [new_data[27], new_data[25], [new_data[28],new_data[29],new_data[30],new_data[31]] ]);
     }
   }
+ */
 })
 
 
-function define_estado(data) {
-  if((data[28] && data[29]) == 'F'){
-    return [data[27], data[25], 'Ligado'];
-  }
-  if((data[28] && data[29]) == '0'){
-    return [data[27], data[25], 'Desligado'];
-  }
-}
+
 

@@ -949,7 +949,3 @@ web/node_modules/.bin/detect-libc.ps1
 web/node_modules/.bin/detect-libc.cmd
 web/node_modules/.bin/detect-libc
 web/package-lock.json
-web/package-lock.json
-web/package-lock.json
-*.json
-web/package-lock.json

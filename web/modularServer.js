@@ -196,3 +196,4 @@ function define_estado(data) {
   if((data[28] && data[29]) == '0'){
     return [data[27], data[25], 'Desligado'];
   }
+}

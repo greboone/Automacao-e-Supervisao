@@ -109,6 +109,8 @@ sPort.open(function (err) {
   console.log('Porta Serial Aberta')
 })
 
+
+
 parser.on('data', (data) => {
   var new_data = data.split('');
   console.log(data);
@@ -134,4 +136,3 @@ function define_estado(data) {
     return [data[27], data[25], 'Desligado'];
   }
 }
-

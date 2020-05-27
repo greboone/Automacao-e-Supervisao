@@ -9,6 +9,68 @@ const port = 3000
 const mainPage = 'index.html'
 const myStyle  = 'style.css'
 
+/*---- Converte String para ArrayBUffer -----*/
+var convertStringToArrayBuffer = function (str) {
+  var buf = new ArrayBuffer(str.length);
+  var bufView = new Uint8Array(buf);
+  for (var i = 0; i < str.length; i++) {
+      bufView[i] = str.charCodeAt(i);
+  //console.log(bufView[i]);
+  }
+//console.log(buf);
+  return buf;
+}
+
+/*---- soma dois valores somente com operadores binários -----*/
+function somabin(a, b){
+var uncommonBits = a ^ b;
+var commonBits = a & b;
+
+if(commonBits == 0)
+  return uncommonBits
+
+return somabin(uncommonBits, (commonBits << 1));
+}
+
+/*---- Converte string hexadecimal para ascii -----*/
+function hex_to_ascii(str1)
+{
+var hex  = str1.toString();
+var str = '';
+for (var n = 0; n < hex.length; n += 2) {
+  str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
+}
+return str;
+}
+
+/*---- Calcula LRC -----*/
+function calculateLRC(str) {
+  var buffer = convertStringToArrayBuffer(str);
+var testeray = new Uint8Array(Buffer.from(buffer));
+//console.log(testeray);//mostra em hexadecimal
+
+  var lrc = 0;
+var exant = 0;
+  for (var i = 0; i < str.length; i++) {
+  var ex = hex_to_ascii(testeray[i].toString(16));
+  if(i%2!=0){
+    var duex = exant.concat('',ex);
+    //console.log(duex);
+    var decim = parseInt(duex, 16);
+    //console.log(decim);
+    lrc += decim & 0xFF;
+    //console.log(lrc);
+  }
+
+  //console.log(lrc);
+  exant = ex;
+  }
+lrc = (somabin((lrc ^ 0xFF), 1) & 0xFF);
+//console.log(lrc);
+
+  return lrc;
+}
+
 // servidor ouvindo em 'port'
 var app = http.createServer(function(req, res) {
     

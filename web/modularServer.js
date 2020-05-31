@@ -71,6 +71,7 @@ function sleep(ms) {
   });
 }
 /* Exemplo de chamada:
+chama em outro lugar a later()
 async function later()
 	{
 		await sleep(3000);

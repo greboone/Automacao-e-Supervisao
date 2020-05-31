@@ -1,8 +1,41 @@
-body {
-    background-color: lightblue;
+.btn-lg {
+    width: 50%;
 }
 
-h1 {
-    color: navy;
-    margin-left: 20px;
+@import url('https://fonts.googleapis.com/css?family=Montserrat:400,800|Poppins&display=swap');
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Montserrat',sans-serif;
+}
+
+.configCards{
+  display: flex;
+}
+
+.monitCards{
+  display: flex;
+}
+
+.content{
+  flex-wrap: wrap;
+  flex: 1;
+  margin: 20px;
+  padding: 20px;
+  border: 2px solid gray;
+  border-radius: 15px;
+  transition: all .3s ease;
+}
+
+.content p{
+  font-size: 25px;
+  font-family: 'Poppins',sans-serif;
+}
+
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
 }

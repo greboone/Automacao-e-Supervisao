@@ -90,7 +90,7 @@ function LRC(str)
 /*****   Porta Serial *****/
 const SerialPort = require('serialport');
 const Readline = SerialPort.parsers.Readline;
-const sPort = new SerialPort('com3', {
+const sPort = new SerialPort('com11', {
   baudRate: 9600
 })
 const parser = new Readline();

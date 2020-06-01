@@ -9,7 +9,10 @@ const port = 3000
 
 // pagina principal
 const mainPage = 'index.html'
-const myStyle  = 'style.css'
+const myStyle1  = 'style.css'
+const myStyle2  = 'styleConfig.css'
+const myStyle3  = 'styleMonit.css'
+
 
 /*---- Converte String para ArrayBUffer -----*/
 var convertStringToArrayBuffer = function (str) {
@@ -91,7 +94,13 @@ var app = http.createServer(function(req, res) {
         type = 'text/html';
     }
     else if(req.url === '/style.css') {
-        content = fs.readFileSync(myStyle);	// load css
+        content = fs.readFileSync(myStyle1);	// load css
+        type = 'text/css';
+    }else if(req.url === '/styleConfig.css') {
+        content = fs.readFileSync(myStyle2);	// load css
+        type = 'text/css';
+    }else if(req.url === '/styleMonit.css') {
+        content = fs.readFileSync(myStyle3);	// load css
         type = 'text/css';
     }
     
@@ -177,7 +186,7 @@ function LRC(str) //do EBONE
 /*****   Porta Serial *****/
 const SerialPort = require('serialport');
 const Readline = SerialPort.parsers.Readline;
-const sPort = new SerialPort('com11', {
+const sPort = new SerialPort('com7', {
   baudRate: 9600
 })
 const parser = new Readline();

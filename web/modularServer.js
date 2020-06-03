@@ -7,12 +7,14 @@ var   fs = require('fs');
 // porta
 const port = 3000
 
+//tamanho de mensagem de monitoramento (mais detalhes na descrição de UltraMsg)
+const monitsize = 147
+
 // pagina principal
 const mainPage = 'index.html'
 const myStyle1  = 'style.css'
 const myStyle2  = 'styleConfig.css'
 const myStyle3  = 'styleMonit.css'
-
 
 /*---- Converte String para ArrayBUffer -----*/
 var convertStringToArrayBuffer = function (str) {
@@ -83,6 +85,35 @@ async function later()
 	}
 */
 
+/*função que define a quantidade de caracteres recebidos e transforma em 4*/
+function handleSize(text){
+  var tam = (text.toString()).length;
+  switch (tam){
+    case 1:
+      return ('000' + text);
+      
+    case 2:
+      return ('00' + text);
+
+    case 3:
+      return ('0' + text);
+
+    case 4:
+      return (text);
+
+    default:
+      return ('0000');
+  }
+}
+
+/*função que reorganiza mensagens de horário, recebendo no formato 'HH:MM', e retornando como 'HHMM' */
+function handleTime(text){
+  var str = (text.toString()).split(':');
+  var hour = str[0];
+  var min = str[1];
+  return (msg=hour+min);
+}
+
 // servidor ouvindo em 'port'
 var app = http.createServer(function(req, res) {
     
@@ -113,20 +144,12 @@ var socket = require('socket.io').listen(app);
 var flag = 0;
 var incremento = 1;
 
+//nota: a tratar endereços de envio, ou formas de envio específicas para a serial quanto às msg de configuração
 socket.on('connection', function(client) {
-    /*client.on('state', function(data){//Do EBONE
-        console.log('Valor de tempo recebido do HTML:' + data);
-        slaveCmd = data[0]
-        slaveOut = data[1]
-        slaveState = data[2]
-        mensagem = ':'+slaveAdr+slaveCmd+slaveOut+slaveState//":030501FF00";
-        lrc = LRC(mensagem)
-        mensagem = ':'+slaveAdr+slaveCmd+slaveOut+slaveState+lrc//":030501FF00lrc";
-		sPort.write(mensagem)
-		console.log(mensagem)
-    })*/
+  /////////////     MENSAGENS DE AÇÃO     /////////////
+  //valores recebidos na ordem da varial mensagem, contendo sliders e inputs da pagina de ação
 	client.on('state', function(Data){//envia na porta serial a msg c/ lrc, com base nos dados recebidos (Data) na conexão state
-        console.log('NODEJS: Setado ' + Data);
+        console.log('Setado ' + Data);
 		slaveAdr = Data[0] //end. escravo
 		slaveRW = Data[1] //op. leitura/escrita
 		slaveAD = Data[2] //port analógica/digital
@@ -136,54 +159,57 @@ socket.on('connection', function(client) {
 		msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();//calcula lrc e armazena aqui
 		var mensagemlrc = ':'+slaveAdr+slaveRW+slaveAD+slaveIO+slaveData+msglrc;//mensagem c/ lrc
 		sPort.write(mensagemlrc)
-		//nada a emitir...
-    })
-	
+		//nada a retornar...
+  })
+
+  /////////////     MENSAGENS DE CONFIGURAÇÃO     /////////////
+
+  //ENTRADA PRINCIPAL
+  client.on('Entry', function(Data){//armazena em variaveis a senha e time de fechamento da porta com base nos dados recebidos (Data) na conexão Entry
+    console.log('Recebido da web: ' + Data);
+    pass = Data[0];
+    var dct = Data[1];  
+    doorCloseTime = handleSize(dct);
+    console.log('Senha '+pass+' e tempo de destravamento '+doorCloseTime+' armazenados');
+    //msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();
+    //sPort.write(mensagemlrc)
+    //nada a retornar...
+  })
+  
+  //SALA DE ESTAR
+  client.on('LivRoom', function(Data){//armazena em variavel a temperatura inicial do AC da sala de estar, com base nos dados recebidos (Data) na conexão LivRoom
+    console.log('Recebido da web:' + Data);
+    ACdeg = handleSize(Data);
+    console.log('temperatura de AC '+ACdeg+' armazenada');
+    //nada a retornar...
+  })
+
+  //JANELAS DA SALA DE ESTAR E DE JANTAR (NOTA: ORGANIZAR RECEBIMENTO DO WIND ALERT)
+  client.on('Windows', function(Data){//armazena em variaveis os horários de controle das janelas, com base nos dados recebidos (Data) na conexão Windows
+    console.log('Recebido da web:' + Data);
+    var aux = Data[0] //meio aberto
+    windhalf = handleTime(aux);
+    aux = Data[1] //abre td
+    windop = handleTime(aux);
+    aux = Data[2]; //fecha td
+    windclose = handleTime(aux);
+    console.log('Hora de abertura '+windop+', de intermedio '+windhalf+', e fechamento '+windclose+ ' armazenadas');
+    //nada a retornar...
+  })
+
+  //QUARTO E BANHEIRO (nota: tratar corretamente o tipo de dado da banda morta)
+  client.on('Heater', function(Data){//armazena em variavel o valor da banda morta com base nos dados recebidos (Data) na conexão Heater
+    console.log('Recebido da web: ' + Data);
+    var aux = Data;
+    deadBand = handleSize(aux);
+    console.log('Senha '+pass+' e tempo de destravamento '+doorCloseTime+' armazenados');
+    //nada a retornar...
+  })
+  
+  //comunicação de monitoramento lá embaixo...
 })
-/*
-function LRC(str) //do EBONE
-{
-  var bytes;
-  var aux = [];
-  var lrc = 0;
 
-*/
-  /* ----- Transformando em hexadecimal ----- */
-  /*
-  for (var i = 1; i < str.length; i+=2) 
-  { 
-    if (str[i] > '9' && str[i+1] > '9')
-      bytes = (Number(str.charCodeAt(i)) - '55')*16 + (Number(str.charCodeAt(i+1)) - '55');
-    
-    else if (str[i] > '9')
-      bytes = (Number(str.charCodeAt(i)) - '55')*16 + (Number(str.charCodeAt(i+1)) - '48');
-
-    else if (str[i+1] > '9')
-      bytes = (Number(str.charCodeAt(i)) - '48')*16 + (Number(str.charCodeAt(i+1)) - '55');
-    
-    else
-      bytes = (Number(str.charCodeAt(i)) - '48')*16 + (Number(str.charCodeAt(i+1)) - '48');
-    
-    aux.push(bytes);
-  }
-
-  for (var i = 0; i < (aux.length); i++)
-  {
-
-    if((lrc + aux[i]) & 0xFF)
-      lrc += aux[i];
-
-  }
-  lrc = ((lrc^0xFF) + 1) & 0xFF;
-
-  lrc = lrc.toString(16);
-  lrc+="";
-  lrc = lrc.toUpperCase();
-
-  return lrc;
-}
-*/
-/*****   Porta Serial *****/
+/***** Porta Serial *****/
 const SerialPort = require('serialport');
 const Readline = SerialPort.parsers.Readline;
 const sPort = new SerialPort('com7', {
@@ -191,6 +217,8 @@ const sPort = new SerialPort('com7', {
 })
 const parser = new Readline();
 sPort.pipe(parser);
+
+/* DEFINIÇÔES DE VARIAVEIS GLOBAIS */
 
 //Variáveis da mensagem Firmware/backend
 var msglrc = '00'; //contém o LRC
@@ -202,10 +230,23 @@ var slaveData = '0000'; //dados do escravo, como pwm 0255, on/off 0001/0000, ou 
 //var mensagem = ':' + slaveAdr + slaveRW + slaveAD + slaveIO + slaveData; //+(LRC) formato padrão de mensagem
 
 //Senha de acesso (front end)
-var pass = '0000'; //padrão é '0000', de 4 digitos. À definir tratamento posteriormente
+var pass = '0000'; //padrão é '0000', deve conter 4 digitos
+//tempo de fechamento da porta, em minutos
+var doorCloseTime = '0001'; //padrão 1 minuto
+
+//temperatura padrão do ar condicionado (25ºC)
+var ACdeg = '0025';
+
+//horarios de controle das janelas (formato: HHMM)
+var windop = '0830'; //abre totalmente as 8:30
+var windhalf = '1600'; //meio abertas as 16:30
+var windclose = '1830'; //fecha totalmente as 18:30
+
+//valor da banda morta, que controla o aquecedor
+var deadBand = '0';
 
 //mensagem de monitoração: conterá um array de strings com informações de sensores e atuadores monitorados
-var UltraMsg; //à definir tamanho, tipo e tratamento posteriormente
+var UltraMsg; //tamanho e formato: char de entrada ':' + 9 caracteres * 16 itens + LRC, contendo 147 caracteres no total
 
 sPort.open(function (err) {
   if(err) {
@@ -217,51 +258,36 @@ sPort.open(function (err) {
 //:+10+2(LRC)=01/2/3/4/5678...
 //tratamento de mensagens recebidas do arduino (respostas)
 parser.on('data', (data) => {
-  console.log(data);
-  var msgarray = data.split(':');//string to char array, a partir do ':'
-  //console.log(msgarray[3]);
-  var wordarray = '';
-  if(msgarray[3]){//se tem 3 strings separas por ':'
-	  var aux = msgarray[3];//pega a última parte, a partir de ':'
-	  var wordarray = aux.split('');//e separa em um array de chars
+  console.log('Node recebe do controlador: '+data);
+
+  if(data.length >= monitsize){
+    /////////////     MENSAGENS DE MONITORAMENTO     /////////////
+    //16 mensagens de tamanho 9, formando: ":+(9chars)*16+LRC"
+    //Formato segue conforme a descrição no arquivo disponível no docs, de item a item
+    //link do docs: https://docs.google.com/document/d/10i8FvYkEybzUDhKXuwmf3X4So2C-hNTiveFeKyaUtrA/edit
+    socket.emit('Monit', [UltraMsg]);//comunicação 'Monit', dado: UltraMsg (descrito nas definições de variaveis)
+
+    //nota: ainda não definido, pois pode ser q mudemos essa parte, sendo o tratamento feito pelo servidor ou pela web
+  }else{
+    //nota: não usado pra nada por enquanto...
+    var msgarray = data.split(':');//string to char array, a partir do ':'
+    //console.log(msgarray[3]);
+    var wordarray = '';
+    if(msgarray[3]){//se tem 3 strings separas por ':'
+      var aux = msgarray[3];//pega a última parte, a partir de ':'
+      var wordarray = aux.split('');//e separa em um array de chars
+    }
+    /*AQUI: Definir comunicações com frontend
+    if(wordarray[6] == 'F' && wordarray[7] == 'F'){
+      global = 'Ligada';
+    }else if(wordarray[6] == '0' && wordarray[7] == '0'){
+      global = 'Desligada';
+    }
+    if(wordarray){
+      global2 = wordarray[6]+wordarray[7]+wordarray[8]+wordarray[9];
+    }
+    */
+    //console.log(global2);
   }
-  /*AQUI: Definir comunicações com frontend
-  if(wordarray[6] == 'F' && wordarray[7] == 'F'){
-	  global = 'Ligada';
-  }else if(wordarray[6] == '0' && wordarray[7] == '0'){
-	  global = 'Desligada';
-  }
-  if(wordarray){
-	  global2 = wordarray[6]+wordarray[7]+wordarray[8]+wordarray[9];
-  }
-  */
-  //console.log(global2);
+  
 })
-
-
-/*
-//do Ebone
-parser.on('data', (data) => {
-  var new_data = data.split('');
-  console.log(data);
-  if(new_data[21] == ':'){
-    if((new_data[24] == '0') && (new_data[25] == '1')){
-      socket.emit('retorno', define_estado(new_data));
-    }
-    if((new_data[24] == '0') && (new_data[25] == '2')){
-      socket.emit('retorno', define_estado(new_data));
-    }
-    if((new_data[24] == '0') && (new_data[25] == '6')){
-      socket.emit('retorno', [new_data[27], new_data[25], [new_data[28],new_data[29],new_data[30],new_data[31]] ]);
-    }
-  }
-})
-
-function define_estado(data) {
-  if((data[28] && data[29]) == 'F'){
-    return [data[27], data[25], 'Ligado'];
-  }
-  if((data[28] && data[29]) == '0'){
-    return [data[27], data[25], 'Desligado'];
-  }
-}*/

@@ -41,8 +41,13 @@
 void msgHandler();
 void msgInit();
 
-void static read_coil    (String msg);
-void static read_input   (String msg);
-void static write_coil   (String msg);
-void static read_analog  (String msg);
-void static write_analog (String msg);
+
+void static portaentrada    (String msg);
+void static saladeestar     (String msg);
+void static quartoebanheiro (String msg);
+
+void static read_coil       (String msg);
+void static read_input      (String msg);
+void static write_coil      (String msg);
+void static read_analog     (String msg);
+void static write_analog    (String msg);

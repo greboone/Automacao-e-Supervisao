@@ -76,61 +76,166 @@ if (Serial.available() > 0)
             break;
         }
         // mensagem é para mim?
-        if(msg[1]==SLAVE_ADR[0] && msg[2]==SLAVE_ADR[1] )
+        switch (msg[1])
         {
-          Serial.println("Endereço de escravo correto...");
-
-          // processa a mensagem
-          int cmd = (msg[3]-'0')*10 + (msg[4]-'0');
-
-          Serial.print("Comando: ");
-          Serial.println(cmd);
-
-          switch (cmd)
+          case '0':
           {
-            case READ_COIL:
-            {
-              read_coil(msg);
-              break;
-            }
-            case READ_INPUT:
-            {
-              read_input(msg);
-              break;
-            }
-            // Escrever em uma saída
-            case WRITE_COIL:
-            {            
-              write_coil(msg);
-              break;
-            }
-
-            case READ_ANALOG:
-            { 
-              read_analog(msg);
-              break;
-            }
-
-            case WRITE_ANALOG:
-            {
-              write_analog(msg);
-              break;
-            }
+            portaentrada(msg);
+            break;
+          }
+          
+          case '1':
+          {
+            saladeestar(msg);
+            break;
           }
 
-        }
+          case '2':
+          {
+            quartoebanheiro(msg);
+            break;
+          }
+
+          default:
+            break;
+
+        }        
         else
         {
-          Serial.println("Mensagem para outro escravo, Aleluia!!!..."); 
+          Serial.println("Mensagem para outro escravo."); 
         }
       } 
       else
       {
-        Serial.println("Formato de mensagem desconhecido...");    
+        Serial.println("Formato de mensagem desconhecido.");    
       }
     }
   }
 }
+
+
+void portaentrada(String msg){
+  switch (msg[2])
+  {
+  case '1': // Porta de entrada: Entrada Sensor digital 24V (monitora estado)
+  {
+    
+    break;
+  }
+  case '2': // Solenoide da Porta: Saída Digital 24V (abre/fecha c/ senha)
+            // Senha padrão: 0000 (4 digitos) (destrava porta e desativa alarme)
+  {
+    
+    break;
+  }
+  case '3': // Alarme sonoro: Saída digital 5v (2m ON 5m OFF)
+  {         
+    
+    break;
+  }
+  default:
+    break;
+  }
+}
+
+void saladeestar(String msg){
+  switch (msg[2])
+  {
+  case '1': // Sensor Temperatura Sala de Estar: Entrada Digital 5V
+            // a. Controla AC (autoTemp)
+            // b. Temperatura padrão: 25ºC
+  {
+    
+    
+    break;
+  }
+  case '2': // AC sala de estar remoto: (manual mode): 
+            // saída analógica 5V (temp = Tensão*10, temp > 0 && temp < 50)
+  {
+    
+    break;
+  }
+  case '3': // Luz de estar: saída analógica 5V (0 = off, 5V = brilho max)
+  {
+    
+    break;
+  }
+  case '4': // Duas portas digitais de saída 24V controlam (cima/baixo)
+  {
+    
+    break;
+  }
+  case '5': // Duas portas digitais de saída 24V controlam (cima/baixo)
+  {
+    
+    break;
+  }
+  case '6': // sensor entrada analógico 5v de posição (1v full fechada - 4v full aberta)
+            // 3 Horários padronizados
+            // Time 1: meio aberta (padrão 8:00h)
+            // Time 2: full aberta (padrão 12:00h)
+            // Time 3: full fechada (padrão 18:00h
+
+  {
+    
+    break;
+  }
+  case '7': // Wind Speed: sensor entrada analógico 5V 
+            // (Speed(Km/h) = (Tensão - 0,36206896551)/0,0275862069). 
+            // Se speed >= 50, fechar janelas + Wind Alert 
+  {
+    
+    break;
+  }
+
+  default:
+    break;
+  }
+}
+
+void quartoebanheiro(String msg){
+  switch (msg[2])
+  {
+  case '1': // Janela do Quarto: Duas portas digitais de saída 24V controlam (cima/baixo)
+  {
+    
+    break;
+  }
+  case '2': // Janela do Quarto: Duas portas digitais de saída 24V controlam (cima/baixo)
+  {
+    
+    break;
+  }
+  case '3': // sensor de entrada analógico 5v de posição (1v full fechada - 4v full aberta)
+            // 3 Horários padronizados
+            // Time 1: meio aberta (padrão 8:00h)
+            // Time 2: full aberta (padrão 12:00h)
+            // Time 3: full fechada (padrão 18:00h
+  {
+    
+    break;
+  }
+  case '4': // Luz quarto: saída analógica 5V (0 = off, 5V = brilho max)
+  {
+    
+    break;
+  }
+  case '5': // Sensor de Temperatura: Entrada LM35 Analógico 4-20V (Se < 17ºC, liga aquecedor)
+  {
+    
+    break;
+  }
+  case '6': // Aquecedor: Saída Digital controlado pelo sensor (Dead Band Temp)
+  {
+    
+    break;
+  }
+
+  default:
+    break;
+  }
+}
+
 
 
 // Funcoes para o Switch case

@@ -20,7 +20,7 @@ habitação digital, de forma a adequar as necessidades das pessoas e otimizar a
 elétricas, tecnológicas e sustentáveis.
 
 <div align="center">
-   <img src="imagens/figura1.PNG" alt="figura1" width="50%" height="20%"/></center>
+   <img src="/imagens/figura1.PNG" alt="figura1" width="50%" height="20%"/></center>
 </div>
 
 Na Figura 1, é mostrado um exemplo de controle onde a planta da casa é

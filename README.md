@@ -96,7 +96,7 @@ Horário (Time 2) para abertura total (Ex. 12:00 horas).
 Horário (Time 3) para fechamento total(Ex. 18:00 horas)
 
 <div align="center">
-   <img src="imagens/figura5.PNG" alt="figura5" width="50%" height="20%"/></center>
+   <img src="figura5.PNG" alt="figura5" width="50%" height="20%"/></center>
 </div>
 
 A posição de cada cortina também pode ser definida pelo usuário (Manual Mode),

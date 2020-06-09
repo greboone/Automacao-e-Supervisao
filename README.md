@@ -28,7 +28,7 @@ visualizada juntamente com os pontos monitorados.
 
 
 
-* **Background:**
+* **Projeto:**
 
 O projeto completo inclui:
 1. O desenho esquemático do controlador com modelo virtual para simulação.
@@ -41,6 +41,9 @@ e atuação sobre o controlador (frontend).
 Na Figura 2 é apresentada a planta baixa do apartamento escolhido para o projeto bem
 como a disposição dos sensores e atuadores utilizados.
 
+<div align="center">
+   <img src="figura2.PNG" alt="figura2" width="50%" height="20%"/></center>
+</div>
 
 * **Descrição do controle
 
@@ -58,6 +61,10 @@ aconteça, uma alarme sonoro (door status) deve ser ativado de forma intermitent
 ON, 5 min. OFF), até o fechamento da porta ou desativação manual através de comando
 remoto (alarm cancel), também protegido por senha (mesma utilizada para destravar).
 
+<div align="center">
+   <img src="figura3.PNG" alt="figura3" width="50%" height="20%"/></center>
+</div>
+
 * **Sala de estar:**
 
 Conta com sensor de temperatura do tipo digital, este sensor é responsável por ligar
@@ -72,6 +79,10 @@ A luminosidade da sala de estar é controlada remotamente (Lamp), para isso, uma
 saída analógica deve ser utilizada, sendo 0V lâmpada desligada e 5V lâmpada em seu
 brilho máximo. Ver Figura 4.
 
+<div align="center">
+   <img src="figura4.PNG" alt="figura4" width="50%" height="20%"/></center>
+</div>
+
 * **Janelas da sala de estar e jantar:**
 
 As cortinas das janelas são controladas por motores DC de 24V. A posição atual de
@@ -82,7 +93,11 @@ página de parâmetros de configuração da interface WEB. Três horários poder
 programados:
 Horário (Time 1) para abertura na metade do seu curso (Ex. 08:00 horas).
 Horário (Time 2) para abertura total (Ex. 12:00 horas).
+Horário (Time 3) para fechamento total(Ex. 18:00 horas)
 
+<div align="center">
+   <img src="figura5.PNG" alt="figura5" width="50%" height="20%"/></center>
+</div>
 
 A posição de cada cortina também pode ser definida pelo usuário (Manual Mode),
 para isso ele pode utilizar um controle do tipo slide, na página de interface, para mover os
@@ -104,4 +119,7 @@ temperatura for inferior a 17 graus celsius, o aquecedor deve ser ligado. O cont
 temperatura utilizado é do tipo banda morta, o valor da banda morta (Dead Band Temp.)
 deve ser configurado na página de parâmetros de configuração da interface WEB. Figura
 6.
-Horário (Time 3) para fechamento total(Ex. 18:00 horas)
+
+<div align="center">
+   <img src="figura6.PNG" alt="figura6" width="50%" height="20%"/></center>
+</div>

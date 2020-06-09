@@ -289,5 +289,4 @@ parser.on('data', (data) => {
     */
     //console.log(global2);
   }
-  
 })

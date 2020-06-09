@@ -20,7 +20,7 @@ habitação digital, de forma a adequar as necessidades das pessoas e otimizar a
 elétricas, tecnológicas e sustentáveis.
 
 <div align="center">
-   <img src="/imagens/figura1.PNG" alt="figura1" width="50%" height="20%"/></center>
+   <img src="figura1.PNG" alt="figura1" width="50%" height="20%"/></center>
 </div>
 
 Na Figura 1, é mostrado um exemplo de controle onde a planta da casa é
@@ -62,7 +62,7 @@ ON, 5 min. OFF), até o fechamento da porta ou desativação manual através de 
 remoto (alarm cancel), também protegido por senha (mesma utilizada para destravar).
 
 <div align="center">
-   <img src="imagens/figura3.PNG" alt="figura3" width="50%" height="20%"/></center>
+   <img src="figura3.PNG" alt="figura3" width="50%" height="20%"/></center>
 </div>
 
 * **Sala de estar:**
@@ -80,7 +80,7 @@ saída analógica deve ser utilizada, sendo 0V lâmpada desligada e 5V lâmpada 
 brilho máximo. Ver Figura 4.
 
 <div align="center">
-   <img src="imagens/figura4.PNG" alt="figura4" width="50%" height="20%"/></center>
+   <img src="figura4.PNG" alt="figura4" width="50%" height="20%"/></center>
 </div>
 
 * **Janelas da sala de estar e jantar:**
@@ -121,5 +121,5 @@ deve ser configurado na página de parâmetros de configuração da interface WE
 6.
 
 <div align="center">
-   <img src="imagens/figura6.PNG" alt="figura6" width="50%" height="20%"/></center>
+   <img src="figura6.PNG" alt="figura6" width="50%" height="20%"/></center>
 </div>

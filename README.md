@@ -42,7 +42,7 @@ Na Figura 2 é apresentada a planta baixa do apartamento escolhido para o projet
 como a disposição dos sensores e atuadores utilizados.
 
 <div align="center">
-   <img src="imagens/figura2.PNG" alt="figura2" width="50%" height="20%"/></center>
+   <img src="figura2.PNG" alt="figura2" width="50%" height="20%"/></center>
 </div>
 
 * **Descrição do controle

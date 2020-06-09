@@ -20,7 +20,7 @@ habitação digital, de forma a adequar as necessidades das pessoas e otimizar a
 elétricas, tecnológicas e sustentáveis.
 
 <div align="center">
-   <img src="figura1.PNG" alt="figura1" width="50%" height="20%"/></center>
+   <img src="figura1.PNG" alt="figura1"/></center>
 </div>
 
 Na Figura 1, é mostrado um exemplo de controle onde a planta da casa é
@@ -61,9 +61,7 @@ aconteça, uma alarme sonoro (door status) deve ser ativado de forma intermitent
 ON, 5 min. OFF), até o fechamento da porta ou desativação manual através de comando
 remoto (alarm cancel), também protegido por senha (mesma utilizada para destravar).
 
-<div align="center">
-   <img src="figura3.PNG" alt="figura3" width="50%" height="20%"/></center>
-</div>
+
 
 * **Sala de estar:**
 

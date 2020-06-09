@@ -19,6 +19,9 @@ Em resumo, a Domótica pode ser entendida como uma rede que integra e controla a
 habitação digital, de forma a adequar as necessidades das pessoas e otimizar as funções
 elétricas, tecnológicas e sustentáveis.
 
+<div align="center">
+   <img src="figura1.PNG" alt="diagrama" width="50%" height="20%"/></center>
+</div>
 
 Na Figura 1, é mostrado um exemplo de controle onde a planta da casa é
 visualizada juntamente com os pontos monitorados.

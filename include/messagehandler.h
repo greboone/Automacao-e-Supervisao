@@ -42,9 +42,7 @@ void msgHandler();
 void msgInit();
 
 
-void static portaentrada    (String msg);
-void static saladeestar     (String msg);
-void static quartoebanheiro (String msg);
+
 
 void static read_coil       (String msg);
 void static read_input      (String msg);

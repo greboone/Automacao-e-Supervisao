@@ -4,6 +4,6 @@
 #define PORTAENTRADA 20
 
 
-void static portaentrada    (String msg);
-void static saladeestar     (String msg);
-void static quartoebanheiro (String msg);
+void portaentrada    (String msg);
+void saladeestar     (String msg);
+void quartoebanheiro (String msg);

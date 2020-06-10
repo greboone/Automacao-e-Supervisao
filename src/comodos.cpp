@@ -1,7 +1,8 @@
 #include <Arduino.h>
 #include <stdint.h>
+#include <Wire.h>
+#include "RTClib.h"
 #include "comodos.h"
-
 
 void portaentrada(String msg){
   switch (msg[2])
@@ -33,8 +34,20 @@ void portaentrada(String msg){
   case '3': // Alarme sonoro: Saída digital 5v (2m ON 5m OFF)
   {
     if(msg[3] == LEITURA){
+      if(digitalRead(BUZZER) == HIGH){
+        Serial.print("Buzzer Desligado.");
+      }
 
+      if(digitalRead(BUZZER) == LOW){
+        Serial.print("Buzzer Ligado.");
+      }
     }else if(msg[3] == ESCRITA){
+        if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '1')){
+          ligaBuzzer();
+        }
+        if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '0')){
+          desligaBuzzer();
+        }
         
     }
     break;
@@ -42,6 +55,29 @@ void portaentrada(String msg){
   default:
     break;
   }
+}
+
+void ligaBuzzer(){
+  DateTime now = rtc.now();
+  digitalWrite(BUZZER, LOW);
+
+  initBuzzer[0] = now.hour();
+  initBuzzer[1] = now.minute();
+  initBuzzer[2] = now.second();
+}
+
+void checkBuzzer(){
+  DateTime now = rtc.now();
+  if((initBuzzer[0] == now.hour()) && (initBuzzer[1] == (now.minute()+2)) && (initBuzzer[2] == now.second()))
+    desligaBuzzer();
+}
+
+void desligaBuzzer(){
+  digitalWrite(BUZZER, HIGH);
+
+  initBuzzer[0] = 0;
+  initBuzzer[1] = 0;
+  initBuzzer[2] = 0;
 }
 
 void saladeestar(String msg){
@@ -194,7 +230,7 @@ void quartoebanheiro(String msg){
     break;
   }
 }
-
+/*
 void read_input(String msg){
   // numero da entrada
   int contact = ((msg[5]-'0')*10 + (msg[6]-'0')) + INPUT_OFFSET;
@@ -223,3 +259,4 @@ void read_input(String msg){
   Serial.print("Resposta do Escravo: ");
   Serial.println(msg);
 }
+*/

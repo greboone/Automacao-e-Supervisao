@@ -6,8 +6,8 @@
 #define WRITE_ANALOG 0X07
 
 /* lógica negada para saídas */
-#define ON  0
-#define OFF 1
+// #define ON  0
+// #define OFF 1
 
 /* Parametros */
 #define SLAVE_ADR       "03"

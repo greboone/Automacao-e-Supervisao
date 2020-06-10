@@ -101,10 +101,7 @@ if (Serial.available() > 0)
             break;
 
         }        
-        else
-        {
-          Serial.println("Mensagem para outro escravo."); 
-        }
+        
       } 
       else
       {

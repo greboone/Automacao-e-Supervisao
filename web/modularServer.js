@@ -8,7 +8,7 @@ var   fs = require('fs');
 const port = 3000
 
 //tamanho de mensagem de monitoramento (mais detalhes na descrição de UltraMsg)
-const monitsize = 147
+const monitsize = 64
 
 // pagina principal
 const mainPage = 'index.html'
@@ -141,13 +141,13 @@ var app = http.createServer(function(req, res) {
 }).listen(port)
 
 var socket = require('socket.io').listen(app);
-var flag = 0;
-var incremento = 1;
+//var flag = 0; var n utilizada
+//var incremento = 1; var n utilizada
 
 //nota: a tratar endereços de envio, ou formas de envio específicas para a serial quanto às msg de configuração
 socket.on('connection', function(client) {
   /////////////     MENSAGENS DE AÇÃO     /////////////
-  //valores recebidos na ordem da varial mensagem, contendo sliders e inputs da pagina de ação
+  //valores recebidos na ordem da variavel mensagem, contendo sliders e inputs da pagina de ação
 	client.on('state', function(Data){//envia na porta serial a msg c/ lrc, com base nos dados recebidos (Data) na conexão state
         console.log('Setado ' + Data);
 		slaveAdr = Data[0] //end. escravo
@@ -245,8 +245,25 @@ var windclose = '1830'; //fecha totalmente as 18:30
 //valor da banda morta, que controla o aquecedor
 var deadBand = '0';
 
-//mensagem de monitoração: conterá um array de strings com informações de sensores e atuadores monitorados
-var UltraMsg; //tamanho e formato: char de entrada ':' + 9 caracteres * 16 itens + LRC, contendo 147 caracteres no total
+//mensagem de monitoração: conterá um array de strings com dados de sensores e atuadores monitorados
+var UltraMsg; //tamanho e formato: 4 caracteres * 16 itens contendo 64 caracteres no total
+
+var end01; //dispositivo de endereço 01, descrito no docs
+var end02; //dispositivo de endereço 02, descrito no docs
+var end03; //dispositivo de endereço 03, descrito no docs
+var end11; //dispositivo de endereço 11, descrito no docs
+var end12; //dispositivo de endereço 12, descrito no docs
+var end13; //dispositivo de endereço 13, descrito no docs
+var end14; //dispositivo de endereço 14, descrito no docs
+var end15; //dispositivo de endereço 15, descrito no docs
+var end16; //dispositivo de endereço 16, descrito no docs
+var end17; //dispositivo de endereço 17, descrito no docs
+var end21; //dispositivo de endereço 21, descrito no docs
+var end22; //dispositivo de endereço 22, descrito no docs
+var end23; //dispositivo de endereço 23, descrito no docs
+var end24; //dispositivo de endereço 24, descrito no docs
+var end25; //dispositivo de endereço 25, descrito no docs
+var end26; //dispositivo de endereço 26, descrito no docs
 
 sPort.open(function (err) {
   if(err) {
@@ -254,21 +271,44 @@ sPort.open(function (err) {
   }
   console.log('Porta Serial Aberta')
 })
-//var mensagemantiga = ':'+slaveAdr+slaveCmd+slaveOut+slaveState;=01/23/45/6789...
-//:+10+2(LRC)=01/2/3/4/5678...
+
+
 //tratamento de mensagens recebidas do arduino (respostas)
 parser.on('data', (data) => {
   console.log('Node recebe do controlador: '+data);
 
-  if(data.length >= monitsize){
+  if(data.length >= monitsize){	//>=64
     /////////////     MENSAGENS DE MONITORAMENTO     /////////////
-    //16 mensagens de tamanho 9, formando: ":+(9chars)*16+LRC"
     //Formato segue conforme a descrição no arquivo disponível no docs, de item a item
     //link do docs: https://docs.google.com/document/d/10i8FvYkEybzUDhKXuwmf3X4So2C-hNTiveFeKyaUtrA/edit
-    socket.emit('Monit', [UltraMsg]);//comunicação 'Monit', dado: UltraMsg (descrito nas definições de variaveis)
-
-    //nota: ainda não definido, pois pode ser q mudemos essa parte, sendo o tratamento feito pelo servidor ou pela web
+	//aqui: organizar valor recebido e inserir em UltraMsg
+    
+	//XX0D10000
+	//n precisa pegar o xx, nem Leitura/escrita, nem digital/analógico, nem entrada/saída, pois td estará na ordem de cima pra baixo
+	//dos endereços no docs, ou seja, 01,02,03,11,12,13,14,15,16,17,21,22,23,24,25,26
+	//pensando nisso, serão enviados apenas os dados, separadamente, de forma q o html receberá um vetor de dados na mesma ordem descrita,
+	//formando 16 variaveis de tamanho 4 (64 caracteres)
+    UltraMsg = data;
+	end01 = UltraMsg.slice(0, 4);//end01 recebe 4 primeiros caracteres (0,1,2,3) da string tam 64 (0-3 from 0-63)
+	end02 = UltraMsg.slice(4, 8);
+	end03 = UltraMsg.slice(8, 12);
+	end11 = UltraMsg.slice(12, 16);
+	end12 = UltraMsg.slice(16, 20);
+	end13 = UltraMsg.slice(20, 24);
+	end14 = UltraMsg.slice(24, 28);
+	end15 = UltraMsg.slice(28, 32);
+	end16 = UltraMsg.slice(32, 36);
+	end17 = UltraMsg.slice(36, 40);
+	end21 = UltraMsg.slice(40, 44);
+	end22 = UltraMsg.slice(44, 48);
+	end23 = UltraMsg.slice(48, 52);
+	end24 = UltraMsg.slice(52, 56);
+	end25 = UltraMsg.slice(56, 60);
+	end26 = UltraMsg.slice(60, 64);
+	//se pa dava pra usar um for, mas assim deixa mais facil de entender...
+	socket.emit('Monit', [end01, end02, end03, end11, end12, end13, end14, end15, end16, end17, end21, end22, end23, end24, end25, end26]);//comunicação 'Monit', dado: end01 a end26
   }else{
+	//msg padrão ":+9+2(LRC) === 0/12/3/4/5/6789+LRC(10,11)"
     //nota: não usado pra nada por enquanto...
     var msgarray = data.split(':');//string to char array, a partir do ':'
     //console.log(msgarray[3]);

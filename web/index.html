@@ -37,6 +37,58 @@
                     x.style.display = "none";
                 }
             }
+			
+			//COMUNICAÇÂO DE AÇÂO
+			/*
+			(recebe no servidor:)
+			slaveAdr = Data[0] //end. escravo
+			slaveRW = Data[1] //op. leitura/escrita
+			slaveAD = Data[2] //port analógica/digital
+			slaveIO = Data[3] //Input / Output
+			slaveData = Data[4] //dados: 0000 / 0001 / 0255 / 1024...
+			*/
+			//envia respectivamente endereço, operação, tipo de porta, tipo de pino, e dados na comunicação state, função chamada em todas as operações de ação
+			function action(ADR, RW, AD, IO, DATA) {
+
+			  socket.emit('state', [ADR, RW, AD, IO, DATA] );
+			  console.log('HTML: Enviando mensagem de acao: ' +ADR+RW+AD+IO+DATA);
+			}
+			
+			//COMUNICAÇÂO DE CONFIGURAÇÂO
+			//Comunicação da entrada principal, pagina de configuração
+			function entrada() {//envia respectivamente senha e tempo de fechamento de porta na comunicação 'Entry'. É chamada no clique do botão da Entrada Principal
+			  var x = document.getElementById("pass4dig").value;
+			  var z = document.getElementById("DoorCloseTime").value;
+			  socket.emit('Entry', [x, z] );
+			  console.log('HTML: Enviando senha ' +x+ 'e tempo de fechamento da porta ' +z);
+			}
+			
+			//...
+			
+			//COMUNICAÇÂO DE MONITORAMENTO
+			//nota: comunicação é case sensitive, por isso, n tem problemas usar monit e Monit...
+			socket.on('Monit', function(ultramsg){//recebe vetor ultramsg na comunicação Monit, deve-se lidar com os valores para mostralos na pg de monitoramento
+				var x[16]; 
+				var i;
+				
+				//caso o laço for n funcionar, da pra fazer manualmente, mas a princípio funcionará
+				for(i = 0; i < 16; i++)
+				{
+					x[i] = ultramsg[i];
+					console.log('HTML: recebido dado ' +i+ ' de monitoramento: '+ x[i]);
+					//A FAZER AQUI
+					//adcionar o id às saídas(label, input, display, etc) q serão mostrados os dados,
+					//executando o comando a seguir na ordem correta
+					//document.getElementById("idtal").value = x[i];
+				}
+				
+				for(i = 0; i < 16; i++)
+				{
+					x[i] = 0;
+				}
+			});
+			
+			//A fazer: terminar comunicação Monit, escrever as outras funções de CONFIGURAÇÂO
     
         </script>
     </head>
@@ -55,15 +107,15 @@
                         <form>
                             <div class="form-group">
                                 <b>Senha</b>
-                                <input class="form-control" placeholder="Digite a sua senha">
+                                <input id="pass4dig" class="form-control" placeholder="Digite a sua senha">
                                 <small class="form-text text-muted">Esta senha será solicitada para destravar a porta remotamente.</small>
                             </div>
                             <div class="form-group">
                                 <b>Tempo de fechamento</b>
-                                <input class="form-control" placeholder="Digite o Tempo de Fechamento">
+                                <input id="DoorCloseTime" class="form-control" placeholder="Digite o Tempo de Fechamento">
                                 <small class="form-text text-muted">Este será o tempo máximo que a porta deverá ser fechada.</small>
                             </div>
-                            <button class="btn btn-success">Salvar</button>
+                            <button class="btn btn-success" onclick="entrada()">Salvar</button>
                         </form>
                     </div>
 

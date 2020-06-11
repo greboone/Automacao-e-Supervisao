@@ -56,32 +56,63 @@
 			
 			//COMUNICAÇÂO DE CONFIGURAÇÂO
 			//Comunicação da entrada principal, pagina de configuração
-			function entrada() {//envia respectivamente senha e tempo de fechamento de porta na comunicação 'Entry'. É chamada no clique do botão da Entrada Principal
+			function entry() {//envia respectivamente senha e tempo de fechamento de porta na comunicação 'Entry'. É chamada no clique do botão na configuração da Entrada Principal
 			  var x = document.getElementById("pass4dig").value;
 			  var z = document.getElementById("DoorCloseTime").value;
 			  socket.emit('Entry', [x, z] );
-			  console.log('HTML: Enviando senha ' +x+ 'e tempo de fechamento da porta ' +z);
+			  console.log('HTML: Enviando senha ' +x+ ' e tempo de fechamento da porta ' +z);
+            }
+            
+            function livRoom() {//envia a temperatura do ar condicionado na comunicação 'LivRoom'. É chamada no clique do botão da configuração da Sala de Estar
+              var x = document.getElementById("autoTemp").value;
+              
+			  socket.emit('LivRoom', [x] );
+			  console.log('HTML: Enviando temperatura ' +x+ ' do ar condicionado');
+            }
+            
+            function windows() {//envia respectivamente timer1, timer2 e timer3 na comunicação 'Windows'. É chamada no clique do botão da configuração dos timer
+			  var x = document.getElementById("timer1").value;
+              var y = document.getElementById("timer2").value;
+              var z = document.getElementById("timer3").value;
+			  socket.emit('Windows', [x, y, z] );
+			  console.log('HTML: Enviando timer1 ' +x+ ', timer2 ' +y+ ' e timer3 ' +z);
+            }
+            
+            function heater() {//envia temperatura do aquecedor na comunicação 'Heater'. É chamada no clique do botão da configuração do Quarto e Banheiro
+			  var x = document.getElementById("tempHeater").value;
+			  socket.emit('Heater', [x] );
+			  console.log('HTML: Enviando temperatura do aquecedor ' +x);
 			}
-			
-			//...
 			
 			//COMUNICAÇÂO DE MONITORAMENTO
 			//nota: comunicação é case sensitive, por isso, n tem problemas usar monit e Monit...
 			socket.on('Monit', function(ultramsg){//recebe vetor ultramsg na comunicação Monit, deve-se lidar com os valores para mostralos na pg de monitoramento
 				var x = []; 
 				var i;
-				
-				//caso o laço for n funcionar, da pra fazer manualmente, mas a princípio funcionará
+			
 				for(i = 0; i < 16; i++)
 				{
 					x[i] = ultramsg[i];
 					console.log('HTML: recebido dado ' +i+ ' de monitoramento: '+ x[i]);
-					//A FAZER AQUI
-					//adcionar o id às saídas(label, input, display, etc) q serão mostrados os dados,
-					//executando o comando a seguir na ordem correta
-					//document.getElementById("idtal").value = x[i];
 				}
-				
+
+                document.getElementById("statusPorta").value       = x[0];
+                document.getElementById("senhaAlarme").value    = x[1];
+                document.getElementById("senhaPorta").value = x[2];
+                document.getElementById("tempAmbiente").value = x[3];
+                document.getElementById("statusArCondicionado").value = x[4];
+                document.getElementById("tempArCondicionado").value = x[5];
+                document.getElementById("luzSala").value = x[6];
+                document.getElementById("posCortina").value = x[7];
+                document.getElementById("velVento").value = x[8];
+                document.getElementById("luzQuartoBanheiro").value = x[9];
+                document.getElementById("tempQuartoBanheiro").value = x[10];
+                document.getElementById("statusAquecedor").value = x[11];
+                document.getElementById("idtal").value = x[12];
+                document.getElementById("idtal").value = x[13];
+                document.getElementById("idtal").value = x[14];
+                document.getElementById("idtal").value = x[15];
+
 				for(i = 0; i < 16; i++)
 				{
 					x[i] = 0;
@@ -96,15 +127,20 @@
     <body>
         <div class="container-fluid">
             <div class="row" id="button">
-                <button type="button" class="btn btn-primary btn-lg" onclick="config()">Configuração</button>
+                <button type="button" class="btn btn-dark btn-lg" onclick="config()">Configuração</button>
                 <button type="button" class="btn btn-secondary btn-lg" onclick="monit()">Monitoramento</button>
            </div>
 
             <div id="config" style="display:none">
+                <br>
+                <h2><span class="badge badge-info">TELA DE CONFIGURAÇÂO DOS PARÂMETROS</span></h2>
+                <br>
                 <div class="configCards">
-                    <div class="content content-1">
-                        <p>Entrada Principal</p>
-                        <form>
+                    <div class="card bg-light mb-3">
+                        <div class="card-header">
+                            <h4><span class="badge badge-primary">Entrada Principal</span></h4>
+                        </div>
+                        <div class="card-body">
                             <div class="form-group">
                                 <b>Senha</b>
                                 <input id="pass4dig" class="form-control" placeholder="Digite a sua senha">
@@ -115,220 +151,302 @@
                                 <input id="DoorCloseTime" class="form-control" placeholder="Digite o Tempo de Fechamento">
                                 <small class="form-text text-muted">Este será o tempo máximo que a porta deverá ser fechada.</small>
                             </div>
-                            <button class="btn btn-success" onclick="entrada()">Salvar</button>
-                        </form>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <button class="btn btn-success" type="button" onclick="entry()">Salvar</button>
+                        </div>
+                    </div>         
+                    
+                    <div class="card bg-light mb-3">
+                        <div class="card-header">
+                            <h4><span class="badge badge-primary">Sala de Estar</span></h4>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="form-group">
+                                    <b>Auto Temp.</b>
+                                    <input id="autoTemp" class="form-control" placeholder="Digite o Auto Temp">
+                                    <small class="form-text text-muted">Está sera a temperatura do ar condicionado.</small>
+                                </div>
+                            </form>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <button class="btn btn-success" type="button" onclick="livRoom()">Salvar</button>
+                        </div>
                     </div>
 
-                    <div class="content content-2">
-                        <p>Sala de Estar</p>
-                        <form>
-                            <div class="form-group">
-                                <b>Auto Temp.</b>
-                                <input class="form-control" placeholder="Digite o Auto Temp">
-                                <small class="form-text text-muted">Está sera a temperatura do ar condicionado.</small>
-                            </div>
-                            <button class="btn btn-success">Salvar</button>
-                        </form>
+                    <div class="card bg-light mb-3">
+                        <div class="card-header">
+                            <h4><span class="badge badge-primary">Timers das Janelas</span></h4>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="form-group">
+                                    <b>Time 1</b>
+                                    <input id="timer1" class="form-control" placeholder="Digite o horário">
+                                    <small class="form-text text-muted">Horário para abertura da metade do curso da cortina.</small>
+                                </div>
+                                <div class="form-group">
+                                    <b>Time 2</b>
+                                    <input id="timer2" class="form-control" placeholder="Digite o horário">
+                                    <small class="form-text text-muted">Horário para abertura total cortina.</small>
+                                </div>
+                                <div class="form-group">
+                                    <b>Time 3</b>
+                                    <input id="timer3" class="form-control" placeholder="Digite o horário">
+                                    <small class="form-text text-muted">Horário para fechamento total da cortina.</small>
+                                </div>
+                            </form>
+                            <br>
+                            <button class="btn btn-success" type="button" onclick="windows()">Salvar</button>
+                        </div>
                     </div>
                     
-                    <div class="content content-3">
-                        <p>Janelas da sala de estar e jantar</p>
-                        <form>
-                            <div class="form-group">
-                                <b>Time 1</b>
-                                <input class="form-control" placeholder="Digite o horário">
-                                <small class="form-text text-muted">Horário para abertura da metade do curso da cortina.</small>
-                            </div>
-                            <div class="form-group">
-                                <b>Time 2</b>
-                                <input class="form-control" placeholder="Digite o horário">
-                                <small class="form-text text-muted">Horário para abertura total cortina.</small>
-                            </div>
-                            <div class="form-group">
-                                <b>Time 3</b>
-                                <input class="form-control" placeholder="Digite o horário">
-                                <small class="form-text text-muted">Horário para fechamento total da cortina.</small>
-                            </div>
-                            <button class="btn btn-success">Salvar</button>
-                        </form>
+                    <div class="card bg-light mb-3">
+                        <div class="card-header">
+                            <h4><span class="badge badge-primary">Quarto e Banheiro</span></h4>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="form-group">
+                                    <b>Temperatura do Aquecedor</b>
+                                    <input id="tempHeater" class="form-control" placeholder="Digite a temperatura">
+                                    <small class="form-text text-muted">Temperatura do aquecedor se a temperautura ambiente for inferior a 17°C.</small>
+                                </div>
+                            </form>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <button class="btn btn-success" type="button" onclick="heater()">Salvar</button>
+                        </div>
                     </div>
-                    
-                    <div class="content content-4">
-                        <p>Quarto e Banheiro</p>
-                        <form>
-                            <div class="form-group">
-                                <b>Temperatura do Aquecedor</b>
-                                <input class="form-control" placeholder="Digite a temperatura">
-                                <small class="form-text text-muted">Temperatura do aquecedor se a temperautura ambiente for inferior a 17°C.</small>
-                            </div>
-                            <button class="btn btn-success">Salvar</button>
-                        </form>
-                    </div>
-
                 </div>
             </div>
 
             <div id="monit" style="display:none">
+                <br>
+                <h2><span class="badge badge-info">TELA DE MONITORAMENTO E AÇÕES</span></h2>
                 <div class="monitCards">
-                    <div class="content content-1">
-                        <p>Entrada Principal</p>
-                        <form class="form-inline">
+                    
+                    <div class="card bg-light mb-3">
+                        <div class="card-header">
+                            <h4><span class="badge badge-primary">Sensores da Entrada Principal</span></h4>
+                        </div>
+                        <div class="card-body">
+                            <form class="form-inline">
+                                <div class="form-group">
+                                  <b>Porta</b>
+                                  <input id="statusPorta" class="form-control mx-sm-3" type="text" readonly>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card-footer bg-transparent border-dark">
+                            <h4><span class="badge badge-danger">Atuadores da Entrada Principal</span></h4>
                             <div class="form-group">
-                              <b>Porta</b>
-                              <input class="form-control mx-sm-3" type="text" readonly>
-                            </div>
-                        </form>
-                        <div class="form-group">
-                            <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#alarmCancel">Cancelar Alarme</button>
-
-                            <div class="modal fade" id="alarmCancel" tabindex="-1" role="dialog" aria-labelledby="alarmCancelLabel" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <b class="modal-title" id="alarmCancelLabel">Cancelar Alarme</b>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <form>
-                                            <div class="form-group">
-                                                <input type="password" class="form-control" id="inputPassword1" placeholder="Senha">
+                                <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#alarmCancel">Cancelar Alarme</button>
+    
+                                <div class="modal fade" id="alarmCancel" tabindex="-1" role="dialog" aria-labelledby="alarmCancelLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <b class="modal-title" id="alarmCancelLabel">Cancelar Alarme</b>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                                </button>
                                             </div>
-                                            </form>
+                                            <div class="modal-body">
+                                                <form>
+                                                <div class="form-group">
+                                                    <input id="senhaAlarme" type="password" class="form-control" id="inputPassword1" placeholder="Senha">
+                                                </div>
+                                                </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-success" data-dismiss="modal">Confirmar</button>
+                                            </div>
                                         </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-success" data-dismiss="modal">Confirmar</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#doorOpen">Abrir Porta</button>
+    
+                                <div class="modal fade" id="doorOpen" tabindex="-1" role="dialog" aria-labelledby="doorOpenLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <b class="modal-title" id="doorOpenLabel">Abrir Porta</b>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form>
+                                                <div class="form-group">
+                                                    <input id="senhaPorta" type="password" class="form-control" id="inputPassword2" placeholder="Senha">
+                                                </div>
+                                                </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-success" data-dismiss="modal">Confirmar</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#doorOpen">Abrir Porta</button>
-
-                            <div class="modal fade" id="doorOpen" tabindex="-1" role="dialog" aria-labelledby="doorOpenLabel" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <b class="modal-title" id="doorOpenLabel">Abrir Porta</b>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <form>
-                                            <div class="form-group">
-                                                <input type="password" class="form-control" id="inputPassword2" placeholder="Senha">
+                    </div>       
+                    
+                    <div class="card bg-light mb-3">
+                        <div class="card-header">
+                            <h4><span class="badge badge-primary">Sensores da Sala de Estar</span></h4>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="form-group">
+                                    <b>Temperatura Ambiente</b>
+                                    <input id="tempAmbiente" class="form-control mx-sm-2" type="text" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <b>Ar condicionado</b>
+                                    <input id="statusArCondicionado" class="form-control mx-sm-2" type="text" readonly>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card-footer bg-transparent border-dark">
+                            <h4><span class="badge badge-danger">Atuadores da Sala de Estar</span></h4>
+                            <div class="form-group">
+                                <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#ativaArCondicionado">Ativar ar condicionado</button>
+    
+                                <div class="modal fade" id="ativaArCondicionado" tabindex="-1" role="dialog" aria-labelledby="ativaArCondicionadoLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <b class="modal-title" id="ativaArCondicionadoLabel">Ativar ar condicionado</b>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                                </button>
                                             </div>
-                                            </form>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-success" data-dismiss="modal">Confirmar</button>
+                                            <div class="modal-body">
+                                                <form>
+                                                    <label>Selecione a temperatura desejada.</label>
+                                                    <select class="form-control" id="tempArCondicionado">
+                                                        <option>17°C</option>
+                                                        <option>18°C</option>
+                                                        <option>19°C</option>
+                                                        <option>20°C</option>
+                                                        <option>21°C</option>
+                                                        <option>22°C</option>
+                                                        <option>23°C</option>
+                                                        <option>24°C</option>
+                                                        <option>25°C</option>
+                                                    </select>
+                                                </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-success" data-dismiss="modal">Confirmar</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                            
+                                <b>Luminosidade da Lampada</b>
+                            <div class="slidecontainer">
+                                <label>Desligada</label>
+                                <input id="luzSala" type="range" min="1" max="100" value="50" class="slider">
+                                <label>Brilho Máximo</label>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                    <div class="card bg-light mb-3">
+                        <div class="card-header">
+                            <h4><span class="badge badge-primary">Sensores das Janelas</span></h4>
+                        </div>
+                        <div class="card-body">
+                            <form class="form">
+                                <div class="form">
+                                    <b>Velocidade do Vento </b>
+                                    <input id="velVento" class="form-control" type="text" readonly>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card-footer bg-transparent border-dark">
+                            <h4><span class="badge badge-danger">Atuadores das Janelas</span></h4>
+                            <b>Posição da cortina</b>
+                            <div class="slidecontainer">
+                                <label>Fechada</label>
+                                <input id="posCortina" type="range" min="1" max="100" value="50" class="slider">
+                                <label>Aberta</label>
                             </div>
                         </div>
                     </div>
 
-                    <div class="content content-2">
-                        <p>Sala de Estar</p>
-                        <form class="form-inline">
-                            <div class="form-group">
-                                <b>Temperatura Ambiente</b>
-                                <input class="form-control mx-sm-2" type="text" readonly>
-                            </div>
-                        
-                            <div class="form-group">
-                                <b>Ar condicionado</b>
-                                <input class="form-control mx-sm-2" type="text" readonly>
-                            </div>
-                        </form>
-                        <div class="form-group">
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ativaArCondicionado">Ativar ar condicionado</button>
-
-                            <div class="modal fade" id="ativaArCondicionado" tabindex="-1" role="dialog" aria-labelledby="ativaArCondicionadoLabel" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <b class="modal-title" id="ativaArCondicionadoLabel">Ativar ar condicionado</b>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <form>
-                                                <label>Selecione a temperatura desejada.</label>
-                                                <select class="form-control" id="exampleFormControlSelect1">
-                                                    <option>17°C</option>
-                                                    <option>18°C</option>
-                                                    <option>19°C</option>
-                                                    <option>20°C</option>
-                                                    <option>21°C</option>
-                                                    <option>22°C</option>
-                                                    <option>23°C</option>
-                                                    <option>24°C</option>
-                                                    <option>25°C</option>
-                                                </select>
-                                            </form>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-success" data-dismiss="modal">Confirmar</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="card bg-light mb-3">
+                        <div class="card-header">
+                            <h4><span class="badge badge-primary">Sensores do Quarto e Banheiro</span></h4>
                         </div>
-                        
+                        <div class="card-body">
+                            <form>
+                                <div class="form-group">
+                                  <b>Temperatura Ambiente</b>
+                                  <input id="tempQuartoBanheiro" class="form-control mx-sm-3" type="text" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <b>Aquecedor</b>
+                                    <input id="statusAquecedor" class="form-control mx-sm-3" type="text" readonly>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card-footer bg-transparent border-dark">
                             <b>Luminosidade da Lampada</b>
-                        <div class="slidecontainer">
-                            <label>Desligada</label>
-                            <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
-                            <label>Brilho Máximo</label>
+                            <div class="slidecontainer">
+                                <label>Desligada</label>
+                                <input id="luzQuartoBanheiro" type="range" min="1" max="100" value="50" class="slider">
+                                <label>Brilho Máximo</label>
+                            </div> 
                         </div>
+                       
                     </div>
-                </div>
-                
-                <div class="monitCards">
-                
-                <div class="content content-3">
-                    <p>Janelas de sala de estar e Jantar</p>
-                    <b>Posição da cortina</b>
-                    <div class="slidecontainer">
-                        <label>Fechada</label>
-                        <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
-                        <label>Aberta</label>
-                    </div>
-                    <form class="form-inline">
-                        <div class="form-group">
-                            <b>Velocidade do Vento</b>
-                            <input class="form-control" type="text" readonly>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="content content-4">
-                    <p>Quarto e Banheiro</p>
-                    <b>Luminosidade da Lampada</b>
-                    <div class="slidecontainer">
-                        <label>Desligada</label>
-                        <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
-                        <label>Brilho Máximo</label>
-                    </div>
-                    <form class="form-inline">
-                        <div class="form-group">
-                          <b>Temperatura Ambiente</b>
-                          <input class="form-control mx-sm-3" type="text" readonly>
-                        </div>
-                        <div class="form-group">
-                            <b>Aquecedor</b>
-                            <input class="form-control mx-sm-3" type="text" readonly>
-                        </div>
-                    </form>
-                </div>
                 </div>
             </div>
-        </div>
+                
+        <nav class="navbar navbar-expand-sm bg-info fixed-bottom">
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                    <li class="nav-item active">
+                        <a href="https://github.com/polesearthur" class="text-light">Arthur Polese</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="https://github.com/greboone" class="text-light">Gustavo Rauber Ebone</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="https://github.com/samu158820" class="text-light">Samuel Antunes Vieira</a> 
+                    </li>
+                </ul>
+                <a href="https://github.com/greboone/Automacao-e-Supervisao" class="text-light">Descrição do Projeto no github</a>
+            </div>
+          </nav>
+
+
+
     </body>
 </html>

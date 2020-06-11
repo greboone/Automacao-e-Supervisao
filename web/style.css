@@ -18,19 +18,9 @@
   display: flex;
 }
 
-.content{
-  flex-wrap: wrap;
+.bg-light {
   flex: 1;
   margin: 20px;
-  padding: 20px;
-  border: 2px solid gray;
-  border-radius: 15px;
-  transition: all .3s ease;
-}
-
-.content p{
-  font-size: 25px;
-  font-family: 'Poppins',sans-serif;
 }
 
 .center {
@@ -38,4 +28,18 @@
   margin-left: auto;
   margin-right: auto;
   width: 50%;
+}
+
+li {
+  margin-right: 15px;
+}
+
+h2 {
+  text-align:center;
+  font-family: 'Poppins',sans-serif;
+}
+
+h4 {
+  text-align:center;
+  font-family: 'Poppins',sans-serif;
 }

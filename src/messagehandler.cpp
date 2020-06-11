@@ -4,11 +4,11 @@
 #include "messagehandler.h"
 #include "comodos.h"
 
-
 void msgInit()
 {
     Serial.begin(9600);
     Serial.println("Sistema Inciado.");
+    iniciaRtc();
 }
 
 void msgHandler()
@@ -111,8 +111,12 @@ if (Serial.available() > 0)
   }
 }
 
+void schedule(){
+  checkDoor();
+  checkBuzzer();
+}
 
-
+/*
 // Funcoes para o Switch case
 void read_coil(String msg){
   int coil = ((msg[5]-'0')*10 + (msg[6]-'0')) + OUTPUT_OFFSET;
@@ -245,7 +249,7 @@ void write_analog(String msg){
   Serial.print("Resposta do Escravo: ");
   Serial.println(msg);
 }
-
+*/
 
 
 

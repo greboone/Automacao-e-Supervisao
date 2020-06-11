@@ -1,8 +1,16 @@
 #include <Arduino.h>
 #include <stdint.h>
-#include <Wire.h>
-#include "RTClib.h"
+
 #include "comodos.h"
+
+
+void iniciaRtc(){
+  if (! rtc.isrunning()) { //SE RTC NÃO ESTIVER SENDO EXECUTADO, FAZ
+    Serial.println("DS1307 rodando!"); //IMPRIME O TEXTO NO MONITOR SERIAL
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); //CAPTURA A DATA E HORA EM QUE O SKETCH É COMPILADO
+    rtc.adjust(DateTime(2020, 6, 11, 14, 00, 00)); //(ANO), (MÊS), (DIA), (HORA), (MINUTOS), (SEGUNDOS)
+  }
+}
 
 void portaentrada(String msg){
   switch (msg[2])
@@ -10,14 +18,10 @@ void portaentrada(String msg){
   case '1': // Porta de entrada: Entrada Sensor digital 24V (monitora estado)
   {
     if(msg[3] == LEITURA){
-        if(digitalRead(PORTAENTRADA) == HIGH){
-            Serial.print("Porta Fechada.");
-        }else{
-            // roda timer quando porta aberta 
-            Serial.print("Porta Aberta.");
-        }
+        checkDoor();
     }else if(msg[3] == ESCRITA){
-        Serial.print("Nada para escrever no estado da porta.");
+      // escreve os valores de close timeout
+      
     }
     break;
   }
@@ -57,27 +61,70 @@ void portaentrada(String msg){
   }
 }
 
+void checkDoor(){
+  DateTime now = rtc.now();
+  if(digitalRead(PORTAENTRADA) == HIGH){
+    Serial.print("Porta Fechada.");
+    doorStatus = FECHADA;
+    doorTimer[0] = 0;
+    desligaBuzzer();
+    controlBuzzer[0] = 2;
+  }else{
+    Serial.print("Porta Aberta.");
+    doorStatus = ABERTA;
+    if(doorTimer[0] == 0){
+      doorTimer[0] = 1;
+      doorTimer[1] = now.hour();
+      doorTimer[2] = now.minute();
+      doorTimer[3] = now.second();
+    }else
+    if(doorTimer[0] == 1){
+      if((doorTimer[1] <= (now.hour()   + closeTimeout[0]))   && 
+         (doorTimer[2] <= (now.minute() + closeTimeout[1]))   && 
+         (doorTimer[3] <= (now.second() + closeTimeout[2]))
+        )
+        ligaBuzzer();
+    }
+
+  }
+}
+
 void ligaBuzzer(){
   DateTime now = rtc.now();
   digitalWrite(BUZZER, LOW);
 
-  initBuzzer[0] = now.hour();
-  initBuzzer[1] = now.minute();
-  initBuzzer[2] = now.second();
+  controlBuzzer[0] = 0;
+  controlBuzzer[1] = now.hour();
+  controlBuzzer[2] = now.minute();
+  controlBuzzer[3] = now.second();
 }
 
 void checkBuzzer(){
   DateTime now = rtc.now();
-  if((initBuzzer[0] == now.hour()) && (initBuzzer[1] == (now.minute()+2)) && (initBuzzer[2] == now.second()))
-    desligaBuzzer();
+  if(controlBuzzer[0] == 0){
+    if((controlBuzzer[1] <= (now.hour()    )) && 
+       (controlBuzzer[2] <= (now.minute()+2)) && 
+       (controlBuzzer[3] <= (now.second()  ))
+      )
+      desligaBuzzer();
+  }else 
+  if(controlBuzzer[0] == 1){
+    if((controlBuzzer[1] <= (now.hour()    )) && 
+       (controlBuzzer[2] <= (now.minute()+5)) && 
+       (controlBuzzer[3] <= (now.second()  ))
+      )
+      ligaBuzzer();
+  }
 }
 
 void desligaBuzzer(){
+  DateTime now = rtc.now();
   digitalWrite(BUZZER, HIGH);
 
-  initBuzzer[0] = 0;
-  initBuzzer[1] = 0;
-  initBuzzer[2] = 0;
+  controlBuzzer[0] = 1;
+  controlBuzzer[1] = now.hour();
+  controlBuzzer[2] = now.minute();
+  controlBuzzer[3] = now.second();
 }
 
 void saladeestar(String msg){

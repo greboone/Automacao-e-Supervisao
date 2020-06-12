@@ -6,11 +6,10 @@
 #define ABERTA  0
 #define FECHADA 1
 
-
 #define PORTAENTRADA 20
 #define BUZZER 21
 
-RTC_DS1307 rtc; 
+extern RTC_DS1307 rtc; 
 
 
 int initBuzzer[3];
@@ -18,8 +17,6 @@ int controlBuzzer[4] = {2,0,0,0};
 int doorStatus;
 int doorTimer[4] = {0,0,0,0};
 int closeTimeout[3] = {0,1,30};
-
-
 
 void portaentrada    (String msg);
 void saladeestar     (String msg);

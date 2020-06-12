@@ -1,6 +1,3 @@
-#include <Arduino.h>
-#include <stdint.h>
-
 #include "comodos.h"
 
 

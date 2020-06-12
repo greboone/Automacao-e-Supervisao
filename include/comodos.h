@@ -1,3 +1,5 @@
+#include <Arduino.h>
+#include <stdint.h>
 #include "RTClib.h"
 
 #define ESCRITA 1

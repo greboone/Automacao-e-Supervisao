@@ -1,8 +1,5 @@
-#include <Arduino.h>
-#include <stdint.h>
-#include "lrc.h"
 #include "messagehandler.h"
-#include "comodos.h"
+
 
 void msgInit()
 {

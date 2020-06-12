@@ -1,4 +1,7 @@
-
+#include <Arduino.h>
+#include <stdint.h>
+#include "lrc.h"
+#include "comodos.h"
 
 
 void msgHandler();

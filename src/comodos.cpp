@@ -1,6 +1,5 @@
 #include "comodos.h"
 
-
 void iniciaRtc(){
   if (! rtc.isrunning()) { //SE RTC NÃO ESTIVER SENDO EXECUTADO, FAZ
     Serial.println("DS1307 rodando!"); //IMPRIME O TEXTO NO MONITOR SERIAL
@@ -26,9 +25,18 @@ void portaentrada(String msg){
             // Senha padrão: 0000 (4 digitos) (destrava porta e desativa alarme)
   {
     if(msg[3] == LEITURA){
-
+      if(digitalRead(TRAVAENTRADA) == HIGH){
+        Serial.print("Porta Fechada.");
+      }else{
+        Serial.print("Porta Aberta.");
+      }
     }else if(msg[3] == ESCRITA){
-        
+      if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '1')){
+        digitalWrite(TRAVAENTRADA, LOW);
+      }
+      if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '0')){
+        digitalWrite(TRAVAENTRADA, HIGH);
+      }
     }
     break;
   }
@@ -133,9 +141,9 @@ void saladeestar(String msg){
   {
     
     if(msg[3] == LEITURA){
-
+      
     }else if(msg[3] == ESCRITA){
-        
+      
     }
     
     break;
@@ -182,7 +190,6 @@ void saladeestar(String msg){
             // Time 1: meio aberta (padrão 8:00h)
             // Time 2: full aberta (padrão 12:00h)
             // Time 3: full fechada (padrão 18:00h
-
   {
     if(msg[3] == LEITURA){
 

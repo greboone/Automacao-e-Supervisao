@@ -9,7 +9,8 @@
 #define FECHADA 1
 
 #define PORTAENTRADA 20
-#define BUZZER 21
+#define TRAVAENTRADA 06
+#define BUZZER 13
 
 extern RTC_DS1307 rtc; 
 

@@ -1,11 +1,24 @@
 #include "comodos.h"
 
+/***************************************Variaveis para o Buzzer*****************************************/
+
+int initBuzzer[3];
+int controlBuzzer[4] = {2,0,0,0};
+int doorStatus;
+int doorTimer[4] = {0,0,0,0};
+int closeTimeout[3] = {0,1,30};
+
+/*******************************************************************************************************/
+
 void iniciaRtc(){
   if (! rtc.isrunning()) { //SE RTC NÃO ESTIVER SENDO EXECUTADO, FAZ
     Serial.println("DS1307 rodando!"); //IMPRIME O TEXTO NO MONITOR SERIAL
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); //CAPTURA A DATA E HORA EM QUE O SKETCH É COMPILADO
     rtc.adjust(DateTime(2020, 6, 11, 14, 00, 00)); //(ANO), (MÊS), (DIA), (HORA), (MINUTOS), (SEGUNDOS)
   }
+  sensors.begin(); //INICIA O SENSOR
+  sensors.getAddress(sensor, 0);
+  delay(1000); //INTERVALO DE 1 SEGUNDO
 }
 
 void portaentrada(String msg){
@@ -32,10 +45,10 @@ void portaentrada(String msg){
       }
     }else if(msg[3] == ESCRITA){
       if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '1')){
-        digitalWrite(TRAVAENTRADA, LOW);
+        digitalWrite(TRAVAENTRADA, LOW);  // Abre trava
       }
       if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '0')){
-        digitalWrite(TRAVAENTRADA, HIGH);
+        digitalWrite(TRAVAENTRADA, HIGH); // Fecha trava
       }
     }
     break;
@@ -44,20 +57,21 @@ void portaentrada(String msg){
   {
     if(msg[3] == LEITURA){
       if(digitalRead(BUZZER) == HIGH){
-        Serial.print("Buzzer Desligado.");
+        Serial.print("Alarme Desligado.");
       }
 
       if(digitalRead(BUZZER) == LOW){
-        Serial.print("Buzzer Ligado.");
+        Serial.print("Alarme Ligado.");
       }
-    }else if(msg[3] == ESCRITA){
-        if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '1')){
-          ligaBuzzer();
-        }
-        if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '0')){
-          desligaBuzzer();
-        }
-        
+
+    }else 
+    if(msg[3] == ESCRITA){
+      if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '1')){
+        ligaBuzzer();
+      }
+      if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '0')){
+        desligaBuzzer();
+      }
     }
     break;
   }
@@ -65,6 +79,9 @@ void portaentrada(String msg){
     break;
   }
 }
+
+
+/***********************************Funcoes para o Buzzer e Porta***************************************/
 
 void checkDoor(){
   DateTime now = rtc.now();
@@ -132,6 +149,10 @@ void desligaBuzzer(){
   controlBuzzer[3] = now.second();
 }
 
+/*******************************************************************************************************/
+
+float tempC, aux;
+
 void saladeestar(String msg){
   switch (msg[2])
   {
@@ -141,7 +162,19 @@ void saladeestar(String msg){
   {
     
     if(msg[3] == LEITURA){
-      
+
+      tempC = sensors.getTempC(sensor);
+      if (tempC == -127.00){
+        Serial.print("C: ");
+        Serial.print(aux);
+      }else{
+        Serial.print("C: ");
+        Serial.print(tempC);
+        aux = tempC;
+      }
+      sensors.requestTemperatures();
+      Serial.print("\n");
+
     }else if(msg[3] == ESCRITA){
       
     }
@@ -215,6 +248,22 @@ void saladeestar(String msg){
   }
 }
 
+
+void temperaturaSala(){
+  aux = sensors.getTempC(sensor);
+  if (aux != -127.00){
+    tempC = aux;
+  }
+  
+  sensors.requestTemperatures();
+
+}
+
+/****************************************Funcoes para o Buzzer******************************************/
+
+/*******************************************************************************************************/
+
+
 void quartoebanheiro(String msg){
   switch (msg[2])
   {
@@ -281,33 +330,4 @@ void quartoebanheiro(String msg){
     break;
   }
 }
-/*
-void read_input(String msg){
-  // numero da entrada
-  int contact = ((msg[5]-'0')*10 + (msg[6]-'0')) + INPUT_OFFSET;
 
-  // debug
-  Serial.print("Leitura na Entrada ");
-  Serial.println(contact-INPUT_OFFSET);
-
-  // Ligada ou desligada?
-  if(digitalRead(contact))
-  {
-      msg[7]='F';
-      msg[8]='F';
-      msg[9]='0';
-      msg[10]='0';
-  }
-  else
-  {
-    msg[7]='0';
-    msg[8]='0';
-    msg[9]='0';
-    msg[10]='0';
-  }
-  
-  // Resposta com o valor atual da entrada..
-  Serial.print("Resposta do Escravo: ");
-  Serial.println(msg);
-}
-*/

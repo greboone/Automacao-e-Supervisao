@@ -242,6 +242,7 @@
             <div id="monit" style="display:none">
                 <br>
                 <h2><span class="badge badge-info">TELA DE MONITORAMENTO E AÇÕES</span></h2>
+                
                 <div class="monitCards">
                     
                     <div class="card bg-light mb-3">
@@ -256,11 +257,68 @@
                                 </div>
                             </form>
                         </div>
-                        <div class="card-footer bg-transparent border-dark">
+                    </div>       
+                    
+                    <div class="card bg-light mb-3">
+                        <div class="card-header">
+                            <h4><span class="badge badge-primary">Sensores da Sala de Estar</span></h4>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="form-group">
+                                    <b>Temperatura Ambiente</b>
+                                    <input id="tempAmbiente" class="form-control mx-sm-2" type="text" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <b>Ar condicionado</b>
+                                    <input id="statusArCondicionado" class="form-control mx-sm-2" type="text" readonly>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card bg-light mb-3">
+                        <div class="card-header">
+                            <h4><span class="badge badge-primary">Sensores das Janelas</span></h4>
+                        </div>
+                        <div class="card-body">
+                            <form class="form">
+                                <div class="form">
+                                    <b>Velocidade do Vento </b>
+                                    <input id="velVento" class="form-control" type="text" readonly>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card bg-light mb-3">
+                        <div class="card-header">
+                            <h4><span class="badge badge-primary">Sensores do Quarto e Banheiro</span></h4>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="form-group">
+                                  <b>Temperatura Ambiente</b>
+                                  <input id="tempQuartoBanheiro" class="form-control mx-sm-3" type="text" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <b>Aquecedor</b>
+                                    <input id="statusAquecedor" class="form-control mx-sm-3" type="text" readonly>
+                                </div>
+                            </form>
+                        </div>                       
+                    </div>
+                </div>
+
+                <div class="monitCards">
+                    <div class="card bg-light mb-3">
+                        <div class="card-header">
                             <h4><span class="badge badge-danger">Atuadores da Entrada Principal</span></h4>
+                        </div>
+                        <div class="card-body">
                             <div class="form-group">
-                                <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#alarmCancel">Cancelar Alarme</button>
-    
+                                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#alarmCancel">Cancelar Alarme</button>
+                        
                                 <div class="modal fade" id="alarmCancel" tabindex="-1" role="dialog" aria-labelledby="alarmCancelLabel" aria-hidden="true">
                                     <div class="modal-dialog" role="document">
                                         <div class="modal-content">
@@ -285,8 +343,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#doorOpen">Abrir Porta</button>
-    
+                                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#doorOpen">Abrir Porta</button>
                                 <div class="modal fade" id="doorOpen" tabindex="-1" role="dialog" aria-labelledby="doorOpenLabel" aria-hidden="true">
                                     <div class="modal-dialog" role="document">
                                         <div class="modal-content">
@@ -311,29 +368,16 @@
                                 </div>
                             </div>
                         </div>
-                    </div>       
+                    </div>  
                     
                     <div class="card bg-light mb-3">
                         <div class="card-header">
-                            <h4><span class="badge badge-primary">Sensores da Sala de Estar</span></h4>
+                            <h4><span class="badge badge-danger">Atuadores da Sala de Estar</span></h4>
                         </div>
                         <div class="card-body">
-                            <form>
-                                <div class="form-group">
-                                    <b>Temperatura Ambiente</b>
-                                    <input id="tempAmbiente" class="form-control mx-sm-2" type="text" readonly>
-                                </div>
-                                <div class="form-group">
-                                    <b>Ar condicionado</b>
-                                    <input id="statusArCondicionado" class="form-control mx-sm-2" type="text" readonly>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="card-footer bg-transparent border-dark">
-                            <h4><span class="badge badge-danger">Atuadores da Sala de Estar</span></h4>
                             <div class="form-group">
-                                <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#ativaArCondicionado">Ativar ar condicionado</button>
-    
+                                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#ativaArCondicionado">Ativar ar condicionado</button>
+
                                 <div class="modal fade" id="ativaArCondicionado" tabindex="-1" role="dialog" aria-labelledby="ativaArCondicionadoLabel" aria-hidden="true">
                                     <div class="modal-dialog" role="document">
                                         <div class="modal-content">
@@ -366,31 +410,20 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                                <b>Luminosidade da Lampada</b>
+                            <b>Luminosidade da Lampada</b>
                             <div class="slidecontainer">
                                 <label>Desligada</label>
                                 <input id="luzSala" type="range" min="1" max="100" value="50" class="slider">
                                 <label>Brilho Máximo</label>
                             </div>
                         </div>
-                        
-                    </div>
+                    </div> 
 
                     <div class="card bg-light mb-3">
                         <div class="card-header">
-                            <h4><span class="badge badge-primary">Sensores das Janelas</span></h4>
+                            <h4><span class="badge badge-danger">Atuadores das Janelas</span></h4>
                         </div>
                         <div class="card-body">
-                            <form class="form">
-                                <div class="form">
-                                    <b>Velocidade do Vento </b>
-                                    <input id="velVento" class="form-control" type="text" readonly>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="card-footer bg-transparent border-dark">
-                            <h4><span class="badge badge-danger">Atuadores das Janelas</span></h4>
                             <b>Posição da cortina</b>
                             <div class="slidecontainer">
                                 <label>Fechada</label>
@@ -398,25 +431,13 @@
                                 <label>Aberta</label>
                             </div>
                         </div>
-                    </div>
+                    </div> 
 
                     <div class="card bg-light mb-3">
                         <div class="card-header">
-                            <h4><span class="badge badge-primary">Sensores do Quarto e Banheiro</span></h4>
+                            <h4><span class="badge badge-danger">Atuadores do Quarto e Banheiro</span></h4>
                         </div>
                         <div class="card-body">
-                            <form>
-                                <div class="form-group">
-                                  <b>Temperatura Ambiente</b>
-                                  <input id="tempQuartoBanheiro" class="form-control mx-sm-3" type="text" readonly>
-                                </div>
-                                <div class="form-group">
-                                    <b>Aquecedor</b>
-                                    <input id="statusAquecedor" class="form-control mx-sm-3" type="text" readonly>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="card-footer bg-transparent border-dark">
                             <b>Luminosidade da Lampada</b>
                             <div class="slidecontainer">
                                 <label>Desligada</label>
@@ -424,9 +445,9 @@
                                 <label>Brilho Máximo</label>
                             </div> 
                         </div>
-                       
-                    </div>
+                    </div> 
                 </div>
+                   
             </div>
                 
         <nav class="navbar navbar-expand-sm bg-info fixed-bottom">

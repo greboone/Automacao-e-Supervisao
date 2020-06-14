@@ -8,7 +8,7 @@ var   fs = require('fs');
 const port = 3000
 
 //tamanho de mensagem de monitoramento (mais detalhes na descrição de UltraMsg)
-const monitsize = 64
+const monitsize = 28
 
 // pagina principal
 const mainPage = 'index.html'
@@ -106,6 +106,21 @@ function handleSize(text){
   }
 }
 
+//recebe minutos e retorna em formato HHMM
+function convertMinToHHMM(min){
+	if((min/60) >= 1){//calcula hora
+		var hour = (Math.trunc((min/60))).toString();
+		var minute = (min%60).toString();
+		var retorno = hour + minute;
+		return retorno;
+	}else{
+		var hour = "00";
+		var minute = min.toString();
+		var retorno = hour + minute;
+		return retorno;
+	}
+}
+
 /*função que reorganiza mensagens de horário, recebendo no formato 'HH:MM', e retornando como 'HHMM' */
 function handleTime(text){
   var str = (text.toString()).split(':');
@@ -141,8 +156,6 @@ var app = http.createServer(function(req, res) {
 }).listen(port)
 
 var socket = require('socket.io').listen(app);
-//var flag = 0; var n utilizada
-//var incremento = 1; var n utilizada
 
 //nota: a tratar endereços de envio, ou formas de envio específicas para a serial quanto às msg de configuração
 socket.on('connection', function(client) {
@@ -154,25 +167,54 @@ socket.on('connection', function(client) {
 		slaveRW = Data[1] //op. leitura/escrita
 		slaveAD = Data[2] //port analógica/digital
 		slaveIO = Data[3] //Input / Output
-        slaveData = Data[4] //dados: 0000 / 0001 / 0255 / 1024...
+        slaveData = handleSize(Data[4]) //dados: 0000 / 0001 / 0255 / 1024...
 		var mensagem = ':' + slaveAdr + slaveRW + slaveAD + slaveIO + slaveData;//mensagem s/ lrc
 		msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();//calcula lrc e armazena aqui
 		var mensagemlrc = ':'+slaveAdr+slaveRW+slaveAD+slaveIO+slaveData+msglrc;//mensagem c/ lrc
 		sPort.write(mensagemlrc)
 		//nada a retornar...
   })
+  
+  //cancelar alarme
+  client.on('Deactivate', function(Data){//envia mensagem ao firmware para desativar alarme
+    console.log('Recebido da web: ' + Data);
+    if(Data == pass){//senha correta, envia comando ao firmware para desligar alarme
+		var mensagem = ':' + '03' + '1' + 'D' + '1' + '0000';//mensagem s/ lrc
+		msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();//calcula lrc e armazena aqui
+		var mensagemlrc = ':'+slaveAdr+slaveRW+slaveAD+slaveIO+slaveData+msglrc;//mensagem c/ lrc
+		sPort.write(mensagemlrc)
+		console.log('Senha correta, à desativar alarme...');
+	}else{//senha incorreta, manda mensagem de erro na comunicação DeactivateLog
+		socket.emit('DeactivateLog', [passerror])
+	}
+  })
+  
+  //abrir porta
+  client.on('OpDoor', function(Data){//envia mensagem ao firmware para abrir a porta
+    if(Data == pass){//senha correta, envia comando ao firmware para abrir...
+		var mensagem = ':' + '02' + '1' + 'D' + '1' + '0000';//mensagem s/ lrc
+		msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();//calcula lrc e armazena aqui
+		var mensagemlrc = ':'+slaveAdr+slaveRW+slaveAD+slaveIO+slaveData+msglrc;//mensagem c/ lrc
+		sPort.write(mensagemlrc)
+		console.log('Senha correta, à abrir a porta...');
+	}else{//senha incorreta, manda mensagem de erro na comunicação DeactivateLog
+		socket.emit('OpDoorLog', [passerror])
+	}
+  })
+  
 
   /////////////     MENSAGENS DE CONFIGURAÇÃO     /////////////
 
   //ENTRADA PRINCIPAL
-  client.on('Entry', function(Data){//armazena em variaveis a senha e time de fechamento da porta com base nos dados recebidos (Data) na conexão Entry
+  client.on('Entry', function(Data){//armazena em variavel senha e envia ao firmware o time de fechamento da porta com base nos dados recebidos (Data) na conexão Entry
     console.log('Recebido da web: ' + Data);
     pass = Data[0];
-    var dct = Data[1];  
-    doorCloseTime = handleSize(dct);
+    var dct = Data[1];
+    doorCloseTime = convertMinToHHMM(Number(dct));//transforma em numero e converte no formato HHMM
+	var mensagem = ':' + '01' + '1' + 'D' + '0' + doorCloseTime;//mensagem s/ lrc
     console.log('Senha '+pass+' e tempo de destravamento '+doorCloseTime+' armazenados');
-    //msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();
-    //sPort.write(mensagemlrc)
+    msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();
+    sPort.write(msglrc)
     //nada a retornar...
   })
   
@@ -212,7 +254,7 @@ socket.on('connection', function(client) {
 /***** Porta Serial *****/
 const SerialPort = require('serialport');
 const Readline = SerialPort.parsers.Readline;
-const sPort = new SerialPort('com7', {
+const sPort = new SerialPort('COM3', {
   baudRate: 9600
 })
 const parser = new Readline();
@@ -246,7 +288,10 @@ var windclose = '1830'; //fecha totalmente as 18:30
 var deadBand = '0';
 
 //mensagem de monitoração: conterá um array de strings com dados de sensores e atuadores monitorados
-var UltraMsg; //tamanho e formato: 4 caracteres * 16 itens contendo 64 caracteres no total
+var UltraMsg; //tamanho e formato: 4 caracteres * 7 itens contendo 28 caracteres no total
+
+//variavel de erro de senha
+var passerror = "senha incorreta";
 
 var end01; //dispositivo de endereço 01, descrito no docs
 var end02; //dispositivo de endereço 02, descrito no docs
@@ -264,6 +309,7 @@ var end23; //dispositivo de endereço 23, descrito no docs
 var end24; //dispositivo de endereço 24, descrito no docs
 var end25; //dispositivo de endereço 25, descrito no docs
 var end26; //dispositivo de endereço 26, descrito no docs
+var estado;
 
 sPort.open(function (err) {
   if(err) {
@@ -277,7 +323,7 @@ sPort.open(function (err) {
 parser.on('data', (data) => {
   console.log('Node recebe do controlador: '+data);
 
-  if(data.length >= monitsize){	//>=64
+  if(data.length >= monitsize){	//>=28
     /////////////     MENSAGENS DE MONITORAMENTO     /////////////
     //Formato segue conforme a descrição no arquivo disponível no docs, de item a item
     //link do docs: https://docs.google.com/document/d/10i8FvYkEybzUDhKXuwmf3X4So2C-hNTiveFeKyaUtrA/edit
@@ -287,26 +333,65 @@ parser.on('data', (data) => {
 	//n precisa pegar o xx, nem Leitura/escrita, nem digital/analógico, nem entrada/saída, pois td estará na ordem de cima pra baixo
 	//dos endereços no docs, ou seja, 01,02,03,11,12,13,14,15,16,17,21,22,23,24,25,26
 	//pensando nisso, serão enviados apenas os dados, separadamente, de forma q o html receberá um vetor de dados na mesma ordem descrita,
-	//formando 16 variaveis de tamanho 4 (64 caracteres)
+	//formando 7 variaveis de tamanho 4 (28 caracteres)
     UltraMsg = data;
-	end01 = UltraMsg.slice(0, 4);//end01 recebe 4 primeiros caracteres (0,1,2,3) da string tam 64 (0-3 from 0-63)
-	end02 = UltraMsg.slice(4, 8);
-	end03 = UltraMsg.slice(8, 12);
-	end11 = UltraMsg.slice(12, 16);
-	end12 = UltraMsg.slice(16, 20);
-	end13 = UltraMsg.slice(20, 24);
-	end14 = UltraMsg.slice(24, 28);
-	end15 = UltraMsg.slice(28, 32);
-	end16 = UltraMsg.slice(32, 36);
-	end17 = UltraMsg.slice(36, 40);
-	end21 = UltraMsg.slice(40, 44);
-	end22 = UltraMsg.slice(44, 48);
-	end23 = UltraMsg.slice(48, 52);
-	end24 = UltraMsg.slice(52, 56);
-	end25 = UltraMsg.slice(56, 60);
-	end26 = UltraMsg.slice(60, 64);
-	//se pa dava pra usar um for, mas assim deixa mais facil de entender...
-	socket.emit('Monit', [end01, end02, end03, end11, end12, end13, end14, end15, end16, end17, end21, end22, end23, end24, end25, end26]);//comunicação 'Monit', dado: end01 a end26
+	estado = UltraMsg.slice(0, 4);//end01 recebe 4 primeiros caracteres (0,1,2,3) da string tam 28 (0-3 to 24-27)
+	switch(estado)//estados da porta
+	{
+		case "0000":
+			end01 = "Aberto";
+			break;
+		case "0001":
+			end01 = "Fechado";
+			break;
+		case "0002":
+			end01 = "Trancado";
+			break;
+		default:
+			end01 = "Indefinido";
+	}
+	//end02 = UltraMsg.slice(4, 8); //comentados = ações
+	//end03 = UltraMsg.slice(8, 12);
+	estado = UltraMsg.slice(12, 16); //temperatura sala de estar
+	var aux = estado.split('');
+	end11 = aux[2]+aux[3]+"ºC";
+	
+	//end12 = UltraMsg.slice(16, 20); 
+	//end13 = UltraMsg.slice(20, 24);
+	//end14 = UltraMsg.slice(24, 28);
+	//end15 = UltraMsg.slice(28, 32);
+	end16 = UltraMsg.slice(32, 36); //pos. janela estar/jantar
+	
+	estado = UltraMsg.slice(36, 40); //wind speed (em Km/h)
+	aux = estado.split('');
+	end17 = aux[1] + aux[2] + aux[3] + " Km/h"
+	
+	
+	//end21 = UltraMsg.slice(40, 44);
+	//end22 = UltraMsg.slice(44, 48);
+	end23 = UltraMsg.slice(48, 52); //pos. janela quarto
+	
+	
+	//end24 = UltraMsg.slice(52, 56);
+	estado = UltraMsg.slice(56, 60); //temperatura quarto/banheiro
+	var aux = estado.split('');
+	end25 = aux[2]+aux[3]+"ºC";
+	
+	
+	estado = UltraMsg.slice(60, 64);//end26 recebe 4 primeiros caracteres (0,1,2,3) da string tam 64 (0-3 from 0-63)
+	switch(estado)//estados da porta
+	{
+		case "0000":
+			end26 = "Desligado";
+			break;
+		case "0001":
+			end26 = "Ligado";
+			break;
+		default:
+			end26 = "Indefinido";
+	}
+	
+	socket.emit('Monit', [end01, end11, end16, end17, end23, end25, end26]);//comunicação 'Monit', dado: end01 a end26
   }else{
 	//msg padrão ":+9+2(LRC) === 0/12/3/4/5/6789+LRC(10,11)"
     //nota: não usado pra nada por enquanto...

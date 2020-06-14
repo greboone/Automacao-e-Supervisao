@@ -54,6 +54,20 @@
 			  console.log('HTML: Enviando mensagem de acao: ' +ADR+RW+AD+IO+DATA);
 			}
 			
+			function cancelaAlarme()
+			{
+				var x = document.getElementById("senhaAlarme").value
+				socket.emit('Deactivate', [x])
+				console.log('HTML: tentando desativar alarme...');
+			}
+			
+			function abrePorta()
+			{
+				var x = document.getElementById("senhaPorta").value
+				socket.emit('OpDoor', [x])
+				console.log('HTML: tentando abrir a porta...');
+			}
+			
 			//COMUNICAÇÂO DE CONFIGURAÇÂO
 			//Comunicação da entrada principal, pagina de configuração
 			function entry() {//envia respectivamente senha e tempo de fechamento de porta na comunicação 'Entry'. É chamada no clique do botão na configuração da Entrada Principal
@@ -90,36 +104,36 @@
 				var x = []; 
 				var i;
 			
-				for(i = 0; i < 16; i++)
+				for(i = 0; i < 7; i++)
 				{
 					x[i] = ultramsg[i];
 					console.log('HTML: recebido dado ' +i+ ' de monitoramento: '+ x[i]);
 				}
 
-                document.getElementById("statusPorta").value       = x[0];
-                document.getElementById("senhaAlarme").value    = x[1];
-                document.getElementById("senhaPorta").value = x[2];
-                document.getElementById("tempAmbiente").value = x[3];
-                document.getElementById("statusArCondicionado").value = x[4];
-                document.getElementById("tempArCondicionado").value = x[5];
-                document.getElementById("luzSala").value = x[6];
-                document.getElementById("posCortina").value = x[7];
-                document.getElementById("velVento").value = x[8];
-                document.getElementById("luzQuartoBanheiro").value = x[9];
-                document.getElementById("tempQuartoBanheiro").value = x[10];
-                document.getElementById("statusAquecedor").value = x[11];
-                document.getElementById("idtal").value = x[12];
-                document.getElementById("idtal").value = x[13];
-                document.getElementById("idtal").value = x[14];
-                document.getElementById("idtal").value = x[15];
+                document.getElementById("statusPorta").value 			= x[0];	//(aberta, fechada, trancada) 				OK
+                document.getElementById("tempAmbiente").value 			= x[1]; //sensor de temperatura da sala de estar 	OK
+				// AQUI: implementar posição de janela, endereço 16, indice 2
+                document.getElementById("velVento").value 				= x[3]; //formato "xxx Km/h" 						OK
+                // AQUI: implementar posição de janela, endereço 23, indice 4
+                document.getElementById("tempQuartoBanheiro").value 	= x[5]; //sensor de temperatura do quarto/banheiro	OK
+                document.getElementById("statusAquecedor").value 		= x[6]; //(ligado/desligado)						OK
 
-				for(i = 0; i < 16; i++)
+				for(i = 0; i < 7; i++)
 				{
 					x[i] = 0;
 				}
 			});
 			
-			//A fazer: terminar comunicação Monit, escrever as outras funções de CONFIGURAÇÂO
+			//quando a senha informada p/ desativar alarme é incorreta
+			socket.on('DeactivateLog', function(erro){
+				document.getElementById("senhaAlarme").value = erro;
+			})
+			
+			socket.on('OpDoorLog', function(erro){
+				document.getElementById("senhaPorta").value = erro;
+			})
+			
+			//A fazer: terminar comunicação Monit, escrever as outras funções de AÇÃO
     
         </script>
     </head>
@@ -149,7 +163,7 @@
                             <div class="form-group">
                                 <b>Tempo de fechamento</b>
                                 <input id="DoorCloseTime" class="form-control" placeholder="Digite o Tempo de Fechamento">
-                                <small class="form-text text-muted">Este será o tempo máximo que a porta deverá ser fechada.</small>
+                                <small class="form-text text-muted">Este será o tempo máximo (em minutos) que a porta deverá ser fechada.</small>
                             </div>
                             <br>
                             <br>
@@ -220,8 +234,8 @@
                             <form>
                                 <div class="form-group">
                                     <b>Temperatura do Aquecedor</b>
-                                    <input id="tempHeater" class="form-control" placeholder="Digite a temperatura">
-                                    <small class="form-text text-muted">Temperatura do aquecedor se a temperautura ambiente for inferior a 17°C.</small>
+                                    <input id="tempHeater" class="form-control" placeholder="Digite um valor de intervalo">
+                                    <small class="form-text text-muted">Intervalo de temperatura do aquecedor se a temperatura ambiente for inferior à Auto Temp (padrão de 17ºC).</small>
                                 </div>
                             </form>
                             <br>
@@ -269,10 +283,7 @@
                                     <b>Temperatura Ambiente</b>
                                     <input id="tempAmbiente" class="form-control mx-sm-2" type="text" readonly>
                                 </div>
-                                <div class="form-group">
-                                    <b>Ar condicionado</b>
-                                    <input id="statusArCondicionado" class="form-control mx-sm-2" type="text" readonly>
-                                </div>
+                                
                             </form>
                         </div>
                     </div>
@@ -376,8 +387,13 @@
                         </div>
                         <div class="card-body">
                             <div class="form-group">
-                                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#ativaArCondicionado">Ativar ar condicionado</button>
-
+								
+                                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#ativaArCondicionado">AC modo Manual</button>
+								
+								<br><br>
+								
+								<button type="button" class="btn btn-success" >AC modo Automatico</button>
+								
                                 <div class="modal fade" id="ativaArCondicionado" tabindex="-1" role="dialog" aria-labelledby="ativaArCondicionadoLabel" aria-hidden="true">
                                     <div class="modal-dialog" role="document">
                                         <div class="modal-content">
@@ -390,21 +406,13 @@
                                             <div class="modal-body">
                                                 <form>
                                                     <label>Selecione a temperatura desejada.</label>
-                                                    <select class="form-control" id="tempArCondicionado">
-                                                        <option>17°C</option>
-                                                        <option>18°C</option>
-                                                        <option>19°C</option>
-                                                        <option>20°C</option>
-                                                        <option>21°C</option>
-                                                        <option>22°C</option>
-                                                        <option>23°C</option>
-                                                        <option>24°C</option>
-                                                        <option>25°C</option>
-                                                    </select>
+														<br>
+														
+														<input id="tempArCondicionado" type="number" value="17" min="17" max="25" step="1">
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-success" data-dismiss="modal">Confirmar</button>
+                                                <button type="button" onclick="action(12,1,'A',1, document.getElementById('tempArCondicionado').value)" class="btn btn-success" data-dismiss="modal">Confirmar</button>
                                             </div>
                                         </div>
                                     </div>
@@ -413,7 +421,7 @@
                             <b>Luminosidade da Lampada</b>
                             <div class="slidecontainer">
                                 <label>Desligada</label>
-                                <input id="luzSala" type="range" min="1" max="100" value="50" class="slider">
+                                <input id="luzSala" type="range" min="1" max="255" value="50" class="slider" onchange="action(13,1,'A',1,document.getElementById('luzSala').value)">
                                 <label>Brilho Máximo</label>
                             </div>
                         </div>
@@ -427,7 +435,7 @@
                             <b>Posição da cortina</b>
                             <div class="slidecontainer">
                                 <label>Fechada</label>
-                                <input id="posCortina" type="range" min="1" max="100" value="50" class="slider">
+                                <input id="posCortina" type="range" min="1" max="1024" value="50" class="slider" onchange="action(16,1,'A',0,document.getElementById('posCortina').value)">
                                 <label>Aberta</label>
                             </div>
                         </div>
@@ -441,7 +449,7 @@
                             <b>Luminosidade da Lampada</b>
                             <div class="slidecontainer">
                                 <label>Desligada</label>
-                                <input id="luzQuartoBanheiro" type="range" min="1" max="100" value="50" class="slider">
+                                <input id="luzQuartoBanheiro" type="range" min="1" max="255" value="50" class="slider" onchange="action(24,1,'A',1,document.getElementById('luzQuartoBanheiro').value>
                                 <label>Brilho Máximo</label>
                             </div> 
                         </div>

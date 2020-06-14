@@ -68,6 +68,12 @@
 				console.log('HTML: tentando abrir a porta...');
 			}
 			
+			function autoAC() {//envia a temperatura do ar condicionado na comunicação 'LivRoom'. É chamada no clique do botão da configuração da Sala de Estar, e ao clicar no modo auto da pg de ações
+			  var x = "it doesn't matter"
+			  socket.emit('autoAC', [x] );
+			  console.log('HTML: ar condicionado setado para automático');
+            }
+			
 			//COMUNICAÇÂO DE CONFIGURAÇÂO
 			//Comunicação da entrada principal, pagina de configuração
 			function entry() {//envia respectivamente senha e tempo de fechamento de porta na comunicação 'Entry'. É chamada no clique do botão na configuração da Entrada Principal
@@ -77,7 +83,7 @@
 			  console.log('HTML: Enviando senha ' +x+ ' e tempo de fechamento da porta ' +z);
             }
             
-            function livRoom() {//envia a temperatura do ar condicionado na comunicação 'LivRoom'. É chamada no clique do botão da configuração da Sala de Estar
+            function livRoom() {//envia a temperatura do ar condicionado na comunicação 'LivRoom'. É chamada no clique do botão da configuração da Sala de Estar, e ao clicar no modo auto da pg de ações
               var x = document.getElementById("autoTemp").value;
               
 			  socket.emit('LivRoom', [x] );
@@ -95,7 +101,7 @@
             function heater() {//envia temperatura do aquecedor na comunicação 'Heater'. É chamada no clique do botão da configuração do Quarto e Banheiro
 			  var x = document.getElementById("tempHeater").value;
 			  socket.emit('Heater', [x] );
-			  console.log('HTML: Enviando temperatura do aquecedor ' +x);
+			  console.log('HTML: Enviando temperatura dead band ' +x);
 			}
 			
 			//COMUNICAÇÂO DE MONITORAMENTO
@@ -112,11 +118,17 @@
 
                 document.getElementById("statusPorta").value 			= x[0];	//(aberta, fechada, trancada) 				OK
                 document.getElementById("tempAmbiente").value 			= x[1]; //sensor de temperatura da sala de estar 	OK
-				// AQUI: implementar posição de janela, endereço 16, indice 2
-                document.getElementById("velVento").value 				= x[3]; //formato "xxx Km/h" 						OK
-                // AQUI: implementar posição de janela, endereço 23, indice 4
-                document.getElementById("tempQuartoBanheiro").value 	= x[5]; //sensor de temperatura do quarto/banheiro	OK
-                document.getElementById("statusAquecedor").value 		= x[6]; //(ligado/desligado)						OK
+				document.getElementById{"luzSala"}.value				= x[2];
+				
+				// AQUI: implementar posição de janela, endereço 16, indice 3
+				
+                document.getElementById("velVento").value 				= x[4]; //formato "xxx Km/h" 						OK
+				
+                // AQUI: implementar posição de janela, endereço 23, indice 5
+				
+				document.getElementById{"luzQuartoBanheiro"}.value		= x[6];
+                document.getElementById("tempQuartoBanheiro").value 	= x[7]; //sensor de temperatura do quarto/banheiro	OK
+                document.getElementById("statusAquecedor").value 		= x[8]; //(ligado/desligado)						OK
 
 				for(i = 0; i < 7; i++)
 				{
@@ -133,7 +145,7 @@
 				document.getElementById("senhaPorta").value = erro;
 			})
 			
-			//A fazer: terminar comunicação Monit, escrever as outras funções de AÇÃO
+			//A fazer: terminar comunicação Monit
     
         </script>
     </head>
@@ -392,7 +404,7 @@
 								
 								<br><br>
 								
-								<button type="button" class="btn btn-success" >AC modo Automatico</button>
+								<button type="button" class="btn btn-success" onclick="autoAC()">AC modo Automatico</button>
 								
                                 <div class="modal fade" id="ativaArCondicionado" tabindex="-1" role="dialog" aria-labelledby="ativaArCondicionadoLabel" aria-hidden="true">
                                     <div class="modal-dialog" role="document">
@@ -421,7 +433,7 @@
                             <b>Luminosidade da Lampada</b>
                             <div class="slidecontainer">
                                 <label>Desligada</label>
-                                <input id="luzSala" type="range" min="1" max="255" value="50" class="slider" onchange="action(13,1,'A',1,document.getElementById('luzSala').value)">
+                                <input id="luzSala" type="range" min="0" max="255" value="50" class="slider" onchange="action(13,1,'A',1,document.getElementById('luzSala').value)">
                                 <label>Brilho Máximo</label>
                             </div>
                         </div>
@@ -435,7 +447,7 @@
                             <b>Posição da cortina</b>
                             <div class="slidecontainer">
                                 <label>Fechada</label>
-                                <input id="posCortina" type="range" min="1" max="1024" value="50" class="slider" onchange="action(16,1,'A',0,document.getElementById('posCortina').value)">
+                                <input id="posCortina" type="range" min="0" max="1023" value="50" class="slider" onchange="action(16,1,'A',0,document.getElementById('posCortina').value)">
                                 <label>Aberta</label>
                             </div>
                         </div>
@@ -449,7 +461,7 @@
                             <b>Luminosidade da Lampada</b>
                             <div class="slidecontainer">
                                 <label>Desligada</label>
-                                <input id="luzQuartoBanheiro" type="range" min="1" max="255" value="50" class="slider" onchange="action(24,1,'A',1,document.getElementById('luzQuartoBanheiro').value>
+                                <input id="luzQuartoBanheiro" type="range" min="0" max="255" value="50" class="slider" onchange="action(24,1,'A',1,document.getElementById('luzQuartoBanheiro').value>
                                 <label>Brilho Máximo</label>
                             </div> 
                         </div>

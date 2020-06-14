@@ -8,7 +8,7 @@ var   fs = require('fs');
 const port = 3000
 
 //tamanho de mensagem de monitoramento (mais detalhes na descrição de UltraMsg)
-const monitsize = 28
+const monitsize = 36
 
 // pagina principal
 const mainPage = 'index.html'
@@ -202,6 +202,14 @@ socket.on('connection', function(client) {
 	}
   })
   
+  //AC modo automático
+  client.on('autoAC', function(Data){//envia temperatura padrão do AC da sala de estar, com base no dado ACdeg armazenado na conexão autoAC
+	var mensagem = ':' + '12' + '1' + 'A' + '1' + ACdeg;//mensagem s/ lrc
+    msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();
+    sPort.write(msglrc)
+    console.log('temperatura de AC da Sala de estar '+ACdeg+' setada');
+    //nada a retornar...
+  })
 
   /////////////     MENSAGENS DE CONFIGURAÇÃO     /////////////
 
@@ -219,10 +227,13 @@ socket.on('connection', function(client) {
   })
   
   //SALA DE ESTAR
-  client.on('LivRoom', function(Data){//armazena em variavel a temperatura inicial do AC da sala de estar, com base nos dados recebidos (Data) na conexão LivRoom
+  client.on('LivRoom', function(Data){//armazena em variavel a temperatura padrão do AC da sala de estar, com base nos dados recebidos (Data) na conexão LivRoom
     console.log('Recebido da web:' + Data);
-    ACdeg = handleSize(Data);
-    console.log('temperatura de AC '+ACdeg+' armazenada');
+    ACdeg = Data+"00";
+	var mensagem = ':' + '12' + '1' + 'A' + '1' + ACdeg;//mensagem s/ lrc
+    msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();
+    sPort.write(msglrc)
+    console.log('temperatura de AC da Sala de estar '+ACdeg+' armazenada e setada');
     //nada a retornar...
   })
 
@@ -239,12 +250,12 @@ socket.on('connection', function(client) {
     //nada a retornar...
   })
 
-  //QUARTO E BANHEIRO (nota: tratar corretamente o tipo de dado da banda morta)
+  //QUARTO E BANHEIRO
   client.on('Heater', function(Data){//armazena em variavel o valor da banda morta com base nos dados recebidos (Data) na conexão Heater
     console.log('Recebido da web: ' + Data);
     var aux = Data;
     deadBand = handleSize(aux);
-    console.log('Senha '+pass+' e tempo de destravamento '+doorCloseTime+' armazenados');
+    console.log('');
     //nada a retornar...
   })
   
@@ -288,10 +299,12 @@ var windclose = '1830'; //fecha totalmente as 18:30
 var deadBand = '0';
 
 //mensagem de monitoração: conterá um array de strings com dados de sensores e atuadores monitorados
-var UltraMsg; //tamanho e formato: 4 caracteres * 7 itens contendo 28 caracteres no total
+var UltraMsg; //tamanho e formato: 4 caracteres * 9 itens contendo 36 caracteres no total
 
 //variavel de erro de senha
 var passerror = "senha incorreta";
+
+var windalert = "Vento muito forte, janelas sendo fechadas para sua segurança."
 
 var end01; //dispositivo de endereço 01, descrito no docs
 var end02; //dispositivo de endereço 02, descrito no docs
@@ -309,7 +322,7 @@ var end23; //dispositivo de endereço 23, descrito no docs
 var end24; //dispositivo de endereço 24, descrito no docs
 var end25; //dispositivo de endereço 25, descrito no docs
 var end26; //dispositivo de endereço 26, descrito no docs
-var estado;
+var estado; //auxiliar
 
 sPort.open(function (err) {
   if(err) {
@@ -318,12 +331,11 @@ sPort.open(function (err) {
   console.log('Porta Serial Aberta')
 })
 
-
 //tratamento de mensagens recebidas do arduino (respostas)
 parser.on('data', (data) => {
   console.log('Node recebe do controlador: '+data);
 
-  if(data.length >= monitsize){	//>=28
+  if(data.length >= monitsize){	//>=36
     /////////////     MENSAGENS DE MONITORAMENTO     /////////////
     //Formato segue conforme a descrição no arquivo disponível no docs, de item a item
     //link do docs: https://docs.google.com/document/d/10i8FvYkEybzUDhKXuwmf3X4So2C-hNTiveFeKyaUtrA/edit
@@ -333,9 +345,9 @@ parser.on('data', (data) => {
 	//n precisa pegar o xx, nem Leitura/escrita, nem digital/analógico, nem entrada/saída, pois td estará na ordem de cima pra baixo
 	//dos endereços no docs, ou seja, 01,02,03,11,12,13,14,15,16,17,21,22,23,24,25,26
 	//pensando nisso, serão enviados apenas os dados, separadamente, de forma q o html receberá um vetor de dados na mesma ordem descrita,
-	//formando 7 variaveis de tamanho 4 (28 caracteres)
+	//formando 9 variaveis de tamanho 4 (36 caracteres)
     UltraMsg = data;
-	estado = UltraMsg.slice(0, 4);//end01 recebe 4 primeiros caracteres (0,1,2,3) da string tam 28 (0-3 to 24-27)
+	estado = UltraMsg.slice(0, 4);//end01 recebe 4 primeiros caracteres (0,1,2,3) da string tam 36 (0-3 to 32-35)
 	switch(estado)//estados da porta
 	{
 		case "0000":
@@ -350,29 +362,50 @@ parser.on('data', (data) => {
 		default:
 			end01 = "Indefinido";
 	}
-	//end02 = UltraMsg.slice(4, 8); //comentados = ações
-	//end03 = UltraMsg.slice(8, 12);
+	
 	estado = UltraMsg.slice(12, 16); //temperatura sala de estar
 	var aux = estado.split('');
 	end11 = aux[2]+aux[3]+"ºC";
 	
-	//end12 = UltraMsg.slice(16, 20); 
-	//end13 = UltraMsg.slice(20, 24);
-	//end14 = UltraMsg.slice(24, 28);
+	//end02 = UltraMsg.slice(4, 8); //OpDoor (solenoide da porta)
+	//end03 = UltraMsg.slice(8, 12); //Deactivate (alarme sonoro)
+	//end12 = UltraMsg.slice(16, 20); //autoAC (AC sala de estar )
+
+	estado = UltraMsg.slice(20, 24); //luz da sala de estar (pwm de 0-255)
+	var aux = estado.split('');
+	if(Number(aux[1])>0){
+		end13 = aux[1]+aux[2]+aux[3];
+	}else if(Number(aux[2])>0){
+		end13 = aux[2]+aux[3];
+	}else{
+		end13 = aux[3];
+	}
+	
+	//end14 = UltraMsg.slice(24, 28); //motores de janela não utilizados pela web, o uso de sliders controla pelo sensor de posicionamento
 	//end15 = UltraMsg.slice(28, 32);
+	//end21 = UltraMsg.slice(40, 44);
+	//end22 = UltraMsg.slice(44, 48);
+	
 	end16 = UltraMsg.slice(32, 36); //pos. janela estar/jantar
 	
 	estado = UltraMsg.slice(36, 40); //wind speed (em Km/h)
 	aux = estado.split('');
 	end17 = aux[1] + aux[2] + aux[3] + " Km/h"
 	
-	
-	//end21 = UltraMsg.slice(40, 44);
-	//end22 = UltraMsg.slice(44, 48);
 	end23 = UltraMsg.slice(48, 52); //pos. janela quarto
 	
 	
-	//end24 = UltraMsg.slice(52, 56);
+	estado = UltraMsg.slice(20, 24); //luz do quarto e banheiro (pwm de 0-255)
+	var aux = estado.split('');
+	if(Number(aux[1])>0){
+		end24 = aux[1]+aux[2]+aux[3];
+	}else if(Number(aux[2])>0){
+		end24 = aux[2]+aux[3];
+	}else{
+		end24 = aux[3];
+	}
+	
+	
 	estado = UltraMsg.slice(56, 60); //temperatura quarto/banheiro
 	var aux = estado.split('');
 	end25 = aux[2]+aux[3]+"ºC";
@@ -391,9 +424,13 @@ parser.on('data', (data) => {
 			end26 = "Indefinido";
 	}
 	
-	socket.emit('Monit', [end01, end11, end16, end17, end23, end25, end26]);//comunicação 'Monit', dado: end01 a end26
+	socket.emit('Monit', [end01, end11, end13, end16, end17, end23, end24, end25, end26]);//comunicação 'Monit', dado: end01 a end26
   }else{
+	
+	//if(data == ":170A0")//WIND ALERT AQUIIIIIIIIIIII
+	  
 	//msg padrão ":+9+2(LRC) === 0/12/3/4/5/6789+LRC(10,11)"
+	
     //nota: não usado pra nada por enquanto...
     var msgarray = data.split(':');//string to char array, a partir do ':'
     //console.log(msgarray[3]);
@@ -402,16 +439,6 @@ parser.on('data', (data) => {
       var aux = msgarray[3];//pega a última parte, a partir de ':'
       var wordarray = aux.split('');//e separa em um array de chars
     }
-    /*AQUI: Definir comunicações com frontend
-    if(wordarray[6] == 'F' && wordarray[7] == 'F'){
-      global = 'Ligada';
-    }else if(wordarray[6] == '0' && wordarray[7] == '0'){
-      global = 'Desligada';
-    }
-    if(wordarray){
-      global2 = wordarray[6]+wordarray[7]+wordarray[8]+wordarray[9];
-    }
-    */
-    //console.log(global2);
+    
   }
 })

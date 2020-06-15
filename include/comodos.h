@@ -12,7 +12,7 @@
 
 #define PORTAENTRADA 22
 #define TRAVAENTRADA 23
-#define BUZZER 13
+#define BUZZER 42
 #define LUZSALA 8
 #define LUZQUARTO 7
 

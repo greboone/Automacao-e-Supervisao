@@ -17,7 +17,11 @@ int closeTimeout[3] = {0,1,30};
 
 void iniciaRtc(){
   pinMode(BUZZER, OUTPUT);
-  digitalWrite(BUZZER, HIGH);
+  pinMode(TRAVAENTRADA, OUTPUT);
+  pinMode(PORTAENTRADA, INPUT);
+  
+  digitalWrite(TRAVAENTRADA, HIGH);
+  digitalWrite(BUZZER, LOW);
 
   Serial.println("Iniciando o RTC e Sensor de temperatura.");
   if (! rtc.isrunning()) { //SE RTC NÃO ESTIVER SENDO EXECUTADO, FAZ
@@ -25,6 +29,7 @@ void iniciaRtc(){
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); //CAPTURA A DATA E HORA EM QUE O SKETCH É COMPILADO
     rtc.adjust(DateTime(2020, 6, 13, 14, 00, 00)); //(ANO), (MÊS), (DIA), (HORA), (MINUTOS), (SEGUNDOS)
   }
+
   delay(1000);
   Serial.println("RTC OK!");
   sensors.begin(); //INICIA O SENSOR
@@ -62,8 +67,9 @@ void checkDoor(int call){
         if((doorTimer[1] <= (now.hour()   + closeTimeout[0]))   && 
            (doorTimer[2] <= (now.minute() + closeTimeout[1]))   && 
            (doorTimer[3] <= (now.second() + closeTimeout[2]))
-          )
+          ){
           ligaBuzzer();
+          }
       }
     }
     
@@ -98,15 +104,17 @@ void portaentrada(String msg){
   {
     if(msg[3] == LEITURA){
       if(digitalRead(TRAVAENTRADA) == HIGH){
-        Serial.print("Porta Fechada.");
+        Serial.print("Trava Fechada.");
       }else{
-        Serial.print("Porta Aberta.");
+        Serial.print("Trava Aberta.");
       }
     }else if(msg[3] == ESCRITA){
       if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '1')){
+        Serial.println("Abrindo trava.");
         digitalWrite(TRAVAENTRADA, LOW);  // Abre trava
       }
       if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '0')){
+        Serial.println("Fechando trava.");
         digitalWrite(TRAVAENTRADA, HIGH); // Fecha trava
       }
     }
@@ -116,11 +124,11 @@ void portaentrada(String msg){
   {
     if(msg[3] == LEITURA){
       if(digitalRead(BUZZER) == HIGH){
-        Serial.print("Alarme Desligado.");
+        Serial.print("Alarme Ligado.");
       }
 
       if(digitalRead(BUZZER) == LOW){
-        Serial.print("Alarme Ligado.");
+        Serial.print("Alarme Desligado.");
       }
 
     }else 
@@ -128,10 +136,15 @@ void portaentrada(String msg){
       if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '1')){
         Serial.println("Ligando buzzer");
         ligaBuzzer();
+        doorTimer[0] = 0;
+        controlBuzzer[0] = 2;
+        Serial.println(digitalRead(BUZZER));
       }
       if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '0')){
         Serial.println("Desligando buzzer");
         desligaBuzzer();
+        controlBuzzer[0] = 2;
+        Serial.println(digitalRead(BUZZER));
       }
     }
     break;
@@ -147,7 +160,7 @@ void portaentrada(String msg){
 
 void ligaBuzzer(){
   DateTime now = rtc.now();
-  analogWrite(BUZZER, 0);
+  digitalWrite(BUZZER, HIGH);
 
   controlBuzzer[0] = 0;
   controlBuzzer[1] = now.hour();
@@ -170,14 +183,16 @@ void checkBuzzer(){
        (controlBuzzer[3] <= (now.second()  ))
       )
       ligaBuzzer();
+  }else{
+    //Serial.print();
+    Serial.println(digitalRead(BUZZER));
   }
 }
 
 void desligaBuzzer(){
   DateTime now = rtc.now();
-  analogWrite(BUZZER, 255);
-  //digitalWrite(BUZZER, HIGH);
-
+  digitalWrite(BUZZER, LOW);
+  
   controlBuzzer[0] = 1;
   controlBuzzer[1] = now.hour();
   controlBuzzer[2] = now.minute();

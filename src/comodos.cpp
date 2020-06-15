@@ -14,8 +14,9 @@ void iniciaRtc(){
   if (! rtc.isrunning()) { //SE RTC NÃO ESTIVER SENDO EXECUTADO, FAZ
     Serial.println("DS1307 rodando!"); //IMPRIME O TEXTO NO MONITOR SERIAL
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); //CAPTURA A DATA E HORA EM QUE O SKETCH É COMPILADO
-    rtc.adjust(DateTime(2020, 6, 11, 14, 00, 00)); //(ANO), (MÊS), (DIA), (HORA), (MINUTOS), (SEGUNDOS)
+    rtc.adjust(DateTime(2020, 6, 13, 14, 00, 00)); //(ANO), (MÊS), (DIA), (HORA), (MINUTOS), (SEGUNDOS)
   }
+  delay(1000);
   sensors.begin(); //INICIA O SENSOR
   sensors.getAddress(sensor, 0);
   delay(1000); //INTERVALO DE 1 SEGUNDO
@@ -151,6 +152,7 @@ void desligaBuzzer(){
 
 /*******************************************************************************************************/
 
+
 float tempC, aux;
 
 void saladeestar(String msg){
@@ -194,9 +196,20 @@ void saladeestar(String msg){
   case '3': // Luz de estar: saída analógica 5V (0 = off, 5V = brilho max)
   {
     if(msg[3] == LEITURA){
-
+      int value = 0;
+      value = digitalRead(LUZSALA);
+      Serial.print("Luz da sala em ");
+      Serial.println(value);
     }else if(msg[3] == ESCRITA){
-        
+      int c,d,u;
+      // Converte os valores recebidos em string para inteiros
+      c = (msg[7] - '0') * 100;
+      d = (msg[8] - '0') * 10;
+      u = (msg[9] - '0');
+      u = c + d + u;
+      if(u <= 255 || u >= 0){
+        digitalWrite(LUZSALA, u);
+      }
     }
     break;
   }
@@ -249,15 +262,15 @@ void saladeestar(String msg){
 }
 
 
-void temperaturaSala(){
-  aux = sensors.getTempC(sensor);
-  if (aux != -127.00){
-    tempC = aux;
-  }
+// void temperaturaSala(){
+//   aux = sensors.getTempC(sensor);
+//   if (aux != -127.00){
+//     tempC = aux;
+//   }
   
-  sensors.requestTemperatures();
+//   sensors.requestTemperatures();
 
-}
+// }
 
 /****************************************Funcoes para o Buzzer******************************************/
 
@@ -301,9 +314,20 @@ void quartoebanheiro(String msg){
   case '4': // Luz quarto: saída analógica 5V (0 = off, 5V = brilho max)
   {
     if(msg[3] == LEITURA){
-
+      int value = 0;
+      value = digitalRead(LUZQUARTO);
+      Serial.print("Luz do quarto em ");
+      Serial.println(value);
     }else if(msg[3] == ESCRITA){
-        
+      int c,d,u;
+      // Converte os valores recebidos em string para inteiros
+      c = (msg[7] - '0') * 100;
+      d = (msg[8] - '0') * 10;
+      u = (msg[9] - '0');
+      u = c + d + u;
+      if(u <= 255 || u >= 0){
+        digitalWrite(LUZQUARTO, u);
+      }
     }
     break;
   }

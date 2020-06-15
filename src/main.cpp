@@ -8,7 +8,7 @@ void setup()
 {
   // Starta a serial
   msgInit();
-  
+
   delay(100);
 }
 

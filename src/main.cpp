@@ -12,6 +12,7 @@ void setup()
   delay(100);
 }
 
+//LRC desativado
 void loop()
 {
   schedule();

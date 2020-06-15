@@ -4,7 +4,7 @@
 void msgInit()
 {
     Serial.begin(9600);
-    Serial.println("Sistema Inciado.");
+    Serial.println("Serial Inciado.");
     iniciaRtc();
 }
 
@@ -71,7 +71,7 @@ if (Serial.available() > 0)
         else
         {
             Serial.println("LRC incorreto");
-            break;
+            //break;
         }
         // mensagem é para mim?
         switch (msg[1])
@@ -109,8 +109,9 @@ if (Serial.available() > 0)
 }
 
 void schedule(){
-  checkDoor();
+  checkDoor(0);
   checkBuzzer();
+  temperaturaSala();
 }
 
 /*

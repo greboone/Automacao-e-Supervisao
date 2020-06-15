@@ -118,7 +118,7 @@
 
                 document.getElementById("statusPorta").value 			= x[0];	//(aberta, fechada, trancada) 				OK
                 document.getElementById("tempAmbiente").value 			= x[1]; //sensor de temperatura da sala de estar 	OK
-				document.getElementById{"luzSala"}.value				= x[2];
+				document.getElementById("luzSala").value				= x[2];
 				
 				// AQUI: implementar posição de janela, endereço 16, indice 3
 				
@@ -126,7 +126,7 @@
 				
                 // AQUI: implementar posição de janela, endereço 23, indice 5
 				
-				document.getElementById{"luzQuartoBanheiro"}.value		= x[6];
+				document.getElementById("luzQuartoBanheiro").value		= x[6];
                 document.getElementById("tempQuartoBanheiro").value 	= x[7]; //sensor de temperatura do quarto/banheiro	OK
                 document.getElementById("statusAquecedor").value 		= x[8]; //(ligado/desligado)						OK
 
@@ -400,28 +400,47 @@
                         <div class="card-body">
                             <div class="form-group">
 								
-                                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#ativaArCondicionado">AC modo Manual</button>
+                                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#manualModeSala">Manual Mode</button>
 								
 								<br><br>
 								
-								<button type="button" class="btn btn-success" onclick="autoAC()">AC modo Automatico</button>
-								
-                                <div class="modal fade" id="ativaArCondicionado" tabindex="-1" role="dialog" aria-labelledby="ativaArCondicionadoLabel" aria-hidden="true">
+                                <div class="modal fade" id="manualModeSala" tabindex="-1" role="dialog" aria-labelledby="manualModeSalaLabel" aria-hidden="true">
                                     <div class="modal-dialog" role="document">
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <b class="modal-title" id="ativaArCondicionadoLabel">Ativar ar condicionado</b>
+                                                <b class="modal-title" id="manualModeSalaLabel">Manual Mode Ar condicionado</b>
                                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                 <span aria-hidden="true">&times;</span>
                                                 </button>
                                             </div>
                                             <div class="modal-body">
-                                                <form>
-                                                    <label>Selecione a temperatura desejada.</label>
-														<br>
-														
-														<input id="tempArCondicionado" type="number" value="17" min="17" max="25" step="1">
-                                                </form>
+                                                <p>
+                                                    <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#ativarManualMode" aria-expanded="false" aria-controls="ativarManualMode">
+                                                        Ativar manual mode
+                                                    </button>
+                                                </p>
+                                                <div class="collapse" id="ativarManualMode">
+                                                    <div class="card card-body">
+                                                        <form>
+                                                        <label>Selecione a temperatura desejada.</label>
+                                                            <br>      
+                                                            <input id="tempArCondicionado" type="number" value="17" min="17" max="25" step="1">
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                               
+                                                <br>
+
+                                                <p>
+                                                    <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#desativarManualMode" aria-expanded="false" aria-controls="desativarManualMode">
+                                                      Desativar Manual Mode
+                                                    </button>
+                                                  </p>
+                                                  <div class="collapse" id="desativarManualMode">
+                                                        <div class="alert alert-warning" role="alert">
+                                                            Manual Mode desativado!
+                                                        </div>
+                                                  </div>
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" onclick="action(12,1,'A',1, document.getElementById('tempArCondicionado').value)" class="btn btn-success" data-dismiss="modal">Confirmar</button>
@@ -434,7 +453,7 @@
                             <div class="slidecontainer">
                                 <label>Desligada</label>
                                 <input id="luzSala" type="range" min="0" max="255" value="50" class="slider" onchange="action(13,1,'A',1,document.getElementById('luzSala').value)">
-                                <label>Brilho Máximo</label>
+                                <label>Brilho Max.</label>
                             </div>
                         </div>
                     </div> 
@@ -444,12 +463,64 @@
                             <h4><span class="badge badge-danger">Atuadores das Janelas</span></h4>
                         </div>
                         <div class="card-body">
-                            <b>Posição da cortina</b>
-                            <div class="slidecontainer">
-                                <label>Fechada</label>
-                                <input id="posCortina" type="range" min="0" max="1023" value="50" class="slider" onchange="action(16,1,'A',0,document.getElementById('posCortina').value)">
-                                <label>Aberta</label>
+                            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#manualModeJanelas">Manual Mode</button>
+								
+                            <br><br>
+
+                            <div class="modal fade" id="manualModeJanelas" tabindex="-1" role="dialog" aria-labelledby="manualModeJanelasLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <b class="modal-title" id="manualModeJanelasLabel">Manual Mode Janelas</b>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>
+                                                <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#ativarManualModeJanelas" aria-expanded="false" aria-controls="ativarManualModeJanelas">
+                                                    Ativar manual mode
+                                                </button>
+                                            </p>
+                                            <div class="collapse" id="ativarManualModeJanelas">
+                                                <div class="card card-body">
+                                                    <b>Posição da cortina do Quarto</b>
+                                                    <div class="slidecontainer">
+                                                        <label>Fechada</label>
+                                                        <input id="posCortina" type="range" min="0" max="1023" value="50" class="slider" onchange="action(16,1,'A',0,document.getElementById('posCortina').value)">
+                                                        <label>Aberta</label>
+                                                    </div>
+                                                    <br>
+                                                    <b>Posição da cortina da Sala</b>
+                                                    <div class="slidecontainer">
+                                                        <label>Fechada</label>
+                                                        <input id="posCortina" type="range" min="0" max="1023" value="50" class="slider" onchange="action(16,1,'A',0,document.getElementById('posCortina').value)">
+                                                        <label>Aberta</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                           
+                                            <br>
+                
+                                            <p>
+                                                <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#desativarManualModeJanelas" aria-expanded="false" aria-controls="desativarManualModeJanelas">
+                                                  Desativar Manual Mode
+                                                </button>
+                                              </p>
+                                              <div class="collapse" id="desativarManualModeJanelas">
+                                                    <div class="alert alert-warning" role="alert">
+                                                        Manual Mode desativado!
+                                                    </div>
+                                              </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" onclick="action(12,1,'A',1, document.getElementById('tempArCondicionado').value)" class="btn btn-success" data-dismiss="modal">Confirmar</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+
+                          
                         </div>
                     </div> 
 
@@ -461,15 +532,16 @@
                             <b>Luminosidade da Lampada</b>
                             <div class="slidecontainer">
                                 <label>Desligada</label>
-                                <input id="luzQuartoBanheiro" type="range" min="0" max="255" value="50" class="slider" onchange="action(24,1,'A',1,document.getElementById('luzQuartoBanheiro').value>
-                                <label>Brilho Máximo</label>
+                                <input id="luzQuartoBanheiro" type="range" min="0" max="255" value="50" class="slider" onchange="action(24,1,'A',1,document.getElementById('luzQuartoBanheiro').value)">
+                                <label>Brilho Max.</label>
                             </div> 
                         </div>
                     </div> 
-                </div>
-                   
-            </div>
-                
+                </div>          
+
+                <br>
+                <br>
+
         <nav class="navbar navbar-expand-sm bg-info fixed-bottom">
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
@@ -486,8 +558,6 @@
                 <a href="https://github.com/greboone/Automacao-e-Supervisao" class="text-light">Descrição do Projeto no github</a>
             </div>
           </nav>
-
-
 
     </body>
 </html>

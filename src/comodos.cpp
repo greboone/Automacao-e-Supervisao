@@ -19,6 +19,8 @@ void iniciaRtc(){
   pinMode(BUZZER, OUTPUT);
   pinMode(TRAVAENTRADA, OUTPUT);
   pinMode(PORTAENTRADA, INPUT);
+  // pinMode(LUZQUARTO, OUTPUT);
+  // pinMode(LUZSALA, OUTPUT);
   
   digitalWrite(TRAVAENTRADA, HIGH);
   digitalWrite(BUZZER, LOW);
@@ -261,7 +263,7 @@ void saladeestar(String msg){
       u = (msg[9] - '0');
       u = c + d + u;
       if(u <= 255 || u >= 0){
-        analogWrite(LUZSALA, u);
+        analogWrite(LUZSALALEITURA, u);
       }
     }
     break;

@@ -13,7 +13,8 @@
 #define PORTAENTRADA 22
 #define TRAVAENTRADA 23
 #define BUZZER 42
-#define LUZSALA 8
+#define LUZSALA A15 //69 //8
+#define LUZSALALEITURA 8
 #define LUZQUARTO 7
 
 

@@ -185,6 +185,7 @@ socket.on('connection', function(client) {
 		sPort.write(mensagemlrc)
 		console.log('Senha correta, à desativar alarme...');
 	}else{//senha incorreta, manda mensagem de erro na comunicação DeactivateLog
+		console.log('Senha incorreta, enviando msg de erro ao front...');
 		socket.emit('DeactivateLog', [passerror])
 	}
   })
@@ -198,6 +199,7 @@ socket.on('connection', function(client) {
 		sPort.write(mensagemlrc)
 		console.log('Senha correta, à abrir a porta...');
 	}else{//senha incorreta, manda mensagem de erro na comunicação DeactivateLog
+		console.log('Senha incorreta, enviando msg de erro ao front...');
 		socket.emit('OpDoorLog', [passerror])
 	}
   })
@@ -445,13 +447,13 @@ parser.on('data', (data) => {
 		default:
 			end26 = "Indefinido";
 	}
-	
+	console.log("Enviando ultramsg...")
 	socket.emit('Monit', [end01, end11, end13, end16, end17, end23, end24, end25, end26]);//comunicação 'Monit', dado: end01 a end26
   }else{
-	
+	//console.log("Enviando wind alert")
 	//if(data == ":170A0")//WIND ALERT AQUIIIIIIIIIIII
 	  
-	//msg padrão ":+9+2(LRC) === 0/12/3/4/5/6789+LRC(10,11)"
+	//msg padrão ":+9+2(LRC) === 0/1,2/3/4/5/6,7,8,9/10,11"
 	
     //nota: não usado pra nada por enquanto...
     var msgarray = data.split(':');//string to char array, a partir do ':'

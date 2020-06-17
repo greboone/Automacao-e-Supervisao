@@ -19,8 +19,9 @@ void iniciaRtc(){
   pinMode(BUZZER, OUTPUT);
   pinMode(TRAVAENTRADA, OUTPUT);
   pinMode(PORTAENTRADA, INPUT);
-  // pinMode(LUZQUARTO, OUTPUT);
-  // pinMode(LUZSALA, OUTPUT);
+  pinMode(LUZQUARTO, OUTPUT);
+  pinMode(LUZSALA, OUTPUT);
+  pinMode(LUZSALALEITURA, INPUT);
   
   digitalWrite(TRAVAENTRADA, HIGH);
   digitalWrite(BUZZER, LOW);
@@ -205,6 +206,7 @@ void desligaBuzzer(){
 
 
 float tempC, aux;
+int valueSala = 0, valueQuarto = 0;
 
 void temperaturaSala(){
   sensors.requestTemperatures();
@@ -250,20 +252,18 @@ void saladeestar(String msg){
   case '3': // Luz de estar: saída analógica 5V (0 = off, 5V = brilho max)
   {
     if(msg[3] == LEITURA){
-      int value = 0;
-      value = analogRead(LUZSALA);
-      value = map(value, 0, 1023, 0, 255);
+      
       Serial.print("Luz da sala em ");
-      Serial.println(value);
+      Serial.println(valueSala);
     }else if(msg[3] == ESCRITA){
       int c,d,u;
       // Converte os valores recebidos em string para inteiros
       c = (msg[7] - '0') * 100;
       d = (msg[8] - '0') * 10;
       u = (msg[9] - '0');
-      u = c + d + u;
+      valueSala = c + d + u;
       if(u <= 255 || u >= 0){
-        analogWrite(LUZSALALEITURA, u);
+        analogWrite(LUZSALA, valueSala);
       }
     }
     break;
@@ -361,20 +361,17 @@ void quartoebanheiro(String msg){
   case '4': // Luz quarto: saída analógica 5V (0 = off, 5V = brilho max)
   {
     if(msg[3] == LEITURA){
-      int value = 0;
-      value = analogRead(LUZQUARTO);
-      value = map(value, 0, 1023, 0, 255);
       Serial.print("Luz da sala em ");
-      Serial.println(value);
+      Serial.println(valueQuarto);
     }else if(msg[3] == ESCRITA){
       int c,d,u;
       // Converte os valores recebidos em string para inteiros
       c = (msg[7] - '0') * 100;
       d = (msg[8] - '0') * 10;
       u = (msg[9] - '0');
-      u = c + d + u;
+      valueQuarto = c + d + u;
       if(u <= 255 || u >= 0){
-        analogWrite(LUZQUARTO, u);
+        analogWrite(LUZQUARTO, valueQuarto);
       }
     }
     break;

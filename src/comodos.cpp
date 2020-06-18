@@ -11,7 +11,7 @@ int controlBuzzer[4] = {2,0,0,0};
 int doorStatus;
 int doorPast;
 int doorTimer[4] = {0,0,0,0};
-int closeTimeout[3] = {0,1,30};
+int closeTimeout[2] = {0,0};
 
 /*******************************************************************************************************/
 
@@ -21,28 +21,34 @@ void iniciaRtc(){
   pinMode(PORTAENTRADA, INPUT);
   pinMode(LUZQUARTO, OUTPUT);
   pinMode(LUZSALA, OUTPUT);
-  pinMode(LUZSALALEITURA, INPUT);
   
   digitalWrite(TRAVAENTRADA, HIGH);
   digitalWrite(BUZZER, LOW);
 
   Serial.println("Iniciando o RTC e Sensor de temperatura.");
-  if (! rtc.isrunning()) { //SE RTC NÃO ESTIVER SENDO EXECUTADO, FAZ
-    Serial.println("DS1307 rodando!"); //IMPRIME O TEXTO NO MONITOR SERIAL
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); //CAPTURA A DATA E HORA EM QUE O SKETCH É COMPILADO
-    rtc.adjust(DateTime(2020, 6, 13, 14, 00, 00)); //(ANO), (MÊS), (DIA), (HORA), (MINUTOS), (SEGUNDOS)
-  }
 
-  delay(1000);
+  rtc.begin();
+  rtc.isrunning();
+   //SE RTC NÃO ESTIVER SENDO EXECUTADO, FAZ
+    //Serial.println("DS1307 nao ta rodando!"); //IMPRIME O TEXTO NO MONITOR SERIAL
+  rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); //CAPTURA A DATA E HORA EM QUE O SKETCH É COMPILADO
+  //rtc.adjust(DateTime(2020, 6, 13, 14, 00, 00)); //(ANO), (MÊS), (DIA), (HORA), (MINUTOS), (SEGUNDOS)
+
+  delay(500);
   Serial.println("RTC OK!");
+  DateTime now = rtc.now();
+  Serial.print(now.year()); Serial.print("/"); Serial.print(now.month()); Serial.print("/"); Serial.println(now.day());
+  Serial.print(now.hour()); Serial.print(":"); Serial.print(now.minute()); Serial.print(":"); Serial.println(now.second());
+  Serial.println(now.unixtime());
+
   sensors.begin(); //INICIA O SENSOR
   sensors.getAddress(sensor, 0);
-  delay(1000); //INTERVALO DE 1 SEGUNDO
+  delay(500); //INTERVALO DE 1 SEGUNDO
   Serial.println("SENSOR OK!");
 }
 
 
-void checkDoor(int call){
+int checkDoor(int call){
   if(call == 0){
     DateTime now = rtc.now();
     if(digitalRead(PORTAENTRADA) == HIGH){
@@ -79,12 +85,14 @@ void checkDoor(int call){
   }else{
       if(digitalRead(PORTAENTRADA) == HIGH){
         Serial.println("Porta Fechada.");
+        return FECHADA;
       }else{
         Serial.println("Porta Aberta.");
+        return ABERTA;
       }
     }
 
-
+  return(0);
 }
 
 void portaentrada(String msg){
@@ -98,7 +106,14 @@ void portaentrada(String msg){
       checkDoor(1);
     }else if(msg[3] == ESCRITA){
       // escreve os valores de close timeout
-      
+      int H,h,M,m;
+      // Converte os valores recebidos em string para inteiros
+      H = (msg[6] - '0') * 10;
+      h = (msg[7] - '0');
+      closeTimeout[0] = H+h;
+      M = (msg[8] - '0') * 10;
+      m = (msg[9] - '0');
+      closeTimeout[1] = M+m;
     }
     break;
   }
@@ -117,8 +132,13 @@ void portaentrada(String msg){
         digitalWrite(TRAVAENTRADA, LOW);  // Abre trava
       }
       if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '0')){
-        Serial.println("Fechando trava.");
-        digitalWrite(TRAVAENTRADA, HIGH); // Fecha trava
+        if(checkDoor(1) == FECHADA){
+          Serial.println("Fechando trava.");
+          digitalWrite(TRAVAENTRADA, HIGH); // Fecha trava
+        }else{
+          Serial.println("Fechar a porta para trava-la");
+        }
+        
       }
     }
     break;
@@ -188,7 +208,7 @@ void checkBuzzer(){
       ligaBuzzer();
   }else{
     //Serial.print();
-    Serial.println(digitalRead(BUZZER));
+    //Serial.println(digitalRead(BUZZER));
   }
 }
 
@@ -207,6 +227,7 @@ void desligaBuzzer(){
 
 float tempC, aux;
 int valueSala = 0, valueQuarto = 0;
+int salaTemp = 0;
 
 void temperaturaSala(){
   sensors.requestTemperatures();
@@ -217,6 +238,12 @@ void temperaturaSala(){
   sensors.requestTemperatures();
   //Serial.print("Aux: ");
   //Serial.println(aux);
+}
+
+int temptoBytes(int temp){
+
+
+  return ((temp * 51)/10);
 }
 
 void saladeestar(String msg){
@@ -243,9 +270,21 @@ void saladeestar(String msg){
             // saída analógica 5V (temp = Tensão*10, temp > 0 && temp < 50)
   {
     if(msg[3] == LEITURA){
-
+      Serial.print("Valor de temperatura configurado: ");
+      Serial.println(salaTemp);
     }else if(msg[3] == ESCRITA){
-        
+      int T,t;
+      // Converte os valores recebidos em string para inteiros
+      T = (msg[8] - '0') * 10;
+      t = (msg[9] - '0');
+      salaTemp = T+t;
+      Serial.print("Valor recebido: ");
+      Serial.println(salaTemp);
+      if(salaTemp > 50 || salaTemp < 17){
+        Serial.println("Valor de temperatura invalido!");
+        break;
+      }
+      analogWrite(ACSALA,temptoBytes(salaTemp));
     }
     break;
   }
@@ -271,9 +310,9 @@ void saladeestar(String msg){
   case '4': // Duas portas digitais de saída 24V controlam (cima/baixo)
   {
     if(msg[3] == LEITURA){
-
+      
     }else if(msg[3] == ESCRITA){
-        
+      
     }
     break;
   }
@@ -290,7 +329,7 @@ void saladeestar(String msg){
             // 3 Horários padronizados
             // Time 1: meio aberta (padrão 8:00h)
             // Time 2: full aberta (padrão 12:00h)
-            // Time 3: full fechada (padrão 18:00h
+            // Time 3: full fechada (padrão 18:00h)
   {
     if(msg[3] == LEITURA){
 

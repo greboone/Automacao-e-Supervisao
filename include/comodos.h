@@ -10,16 +10,13 @@
 #define ABERTA  0
 #define FECHADA 1
 
+#define LUZQUARTO 7
+#define LUZSALA 8
+#define ACSALA 9
+#define DS18B20 10 
+#define BUZZER 13
 #define PORTAENTRADA 22
 #define TRAVAENTRADA 23
-#define BUZZER 13
-#define LUZSALA 8
-#define LUZQUARTO 7
-
-
-#define DS18B20 10 
-
-
 
 
 extern RTC_DS1307 rtc; 
@@ -29,7 +26,8 @@ void saladeestar     (String msg);
 void quartoebanheiro (String msg);
 
 void iniciaRtc();
-void checkDoor(int call);
+int checkDoor(int call);
+int temptoBytes(int temp);
 void checkBuzzer();
 void ligaBuzzer();
 void desligaBuzzer();

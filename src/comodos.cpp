@@ -13,6 +13,13 @@ int doorPast;
 int doorTimer[4] = {0,0,0,0};
 int closeTimeout[2] = {0,0};
 
+float tempC, aux;
+int valueSala = 0, valueQuarto = 0;
+int salaTemp = 0;
+int controleJanelaquarto = 0, controleJanelasala = 0;
+int posicaoJanelaquarto = 0, posicaoJanelasala = 0;
+
+
 /*******************************************************************************************************/
 
 void iniciaRtc(){
@@ -21,6 +28,12 @@ void iniciaRtc(){
   pinMode(PORTAENTRADA, INPUT);
   pinMode(LUZQUARTO, OUTPUT);
   pinMode(LUZSALA, OUTPUT);
+  pinMode(ENABLESALA, OUTPUT);
+  pinMode(MOTORSALAHORARIO, OUTPUT);
+  pinMode(MOTORSALAANTIHORARIO, OUTPUT);
+  pinMode(ENABLEQUARTO, OUTPUT);
+  pinMode(MOTORQUARTOHORARIO, OUTPUT);
+  pinMode(MOTORQUARTOANTIHORARIO, OUTPUT);
   
   digitalWrite(TRAVAENTRADA, HIGH);
   digitalWrite(BUZZER, LOW);
@@ -46,7 +59,6 @@ void iniciaRtc(){
   delay(500); //INTERVALO DE 1 SEGUNDO
   Serial.println("SENSOR OK!");
 }
-
 
 int checkDoor(int call){
   if(call == 0){
@@ -224,15 +236,100 @@ void desligaBuzzer(){
 
 /*******************************************************************************************************/
 
+// Horario abre, Antihorario fecha
+// Motor Sala
+// Horario 43    Antihorario 44
+// Motor Quarto
+// Horario 46    Antihorario 47
 
-float tempC, aux;
-int valueSala = 0, valueQuarto = 0;
-int salaTemp = 0;
+void desligaMotores(){
+  if(analogRead(ESTADOJANELAQUARTO) >= 819 || analogRead(ESTADOJANELAQUARTO) <= 204){
+    digitalWrite(MOTORQUARTOHORARIO, LOW);
+    digitalWrite(MOTORQUARTOANTIHORARIO, LOW);
+  }
+  if(analogRead(ESTADOJANELASALA) >= 819 || analogRead(ESTADOJANELASALA) <= 204){
+    digitalWrite(MOTORSALAHORARIO, LOW);
+    digitalWrite(MOTORSALAANTIHORARIO, LOW);
+  }
+  if(posicaoJanelaquarto ==  analogRead(ESTADOJANELAQUARTO) ||
+     posicaoJanelaquarto == (analogRead(ESTADOJANELAQUARTO) + 1) ||
+     posicaoJanelaquarto == (analogRead(ESTADOJANELAQUARTO) - 1) ||
+     posicaoJanelaquarto == (analogRead(ESTADOJANELAQUARTO) + 2) ||
+     posicaoJanelaquarto == (analogRead(ESTADOJANELAQUARTO) - 2) ||
+     posicaoJanelaquarto == (analogRead(ESTADOJANELAQUARTO) + 3) ||
+     posicaoJanelaquarto == (analogRead(ESTADOJANELAQUARTO) - 3) ||
+     posicaoJanelaquarto == (analogRead(ESTADOJANELAQUARTO) + 4) ||
+     posicaoJanelaquarto == (analogRead(ESTADOJANELAQUARTO) - 4) ||
+     posicaoJanelaquarto == (analogRead(ESTADOJANELAQUARTO) + 5) ||
+     posicaoJanelaquarto == (analogRead(ESTADOJANELAQUARTO) - 5)){
+        digitalWrite(ENABLEQUARTO, LOW);
+        digitalWrite(MOTORQUARTOHORARIO, LOW);
+        digitalWrite(MOTORQUARTOANTIHORARIO, LOW);
+        controleJanelaquarto = 0;
+  }
+  if(posicaoJanelasala ==  analogRead(ESTADOJANELASALA) ||
+     posicaoJanelasala == (analogRead(ESTADOJANELASALA) + 1) ||
+     posicaoJanelasala == (analogRead(ESTADOJANELASALA) - 1) ||
+     posicaoJanelasala == (analogRead(ESTADOJANELASALA) + 2) ||
+     posicaoJanelasala == (analogRead(ESTADOJANELASALA) - 2) ||
+     posicaoJanelasala == (analogRead(ESTADOJANELASALA) + 3) ||
+     posicaoJanelasala == (analogRead(ESTADOJANELASALA) - 3) ||
+     posicaoJanelasala == (analogRead(ESTADOJANELASALA) + 4) ||
+     posicaoJanelasala == (analogRead(ESTADOJANELASALA) - 4) ||
+     posicaoJanelasala == (analogRead(ESTADOJANELASALA) + 5) ||
+     posicaoJanelasala == (analogRead(ESTADOJANELASALA) - 5)){
+        digitalWrite(ENABLESALA, LOW);
+        digitalWrite(MOTORSALAHORARIO, LOW);
+        digitalWrite(MOTORSALAANTIHORARIO, LOW);
+        controleJanelasala = 0;
+  }
+}
+
+void controlaMotores(){
+  if(controleJanelaquarto == 1){
+    Serial.print("Posicao usuario: "); Serial.print(posicaoJanelaquarto);
+    Serial.print(" Valor lido: ");Serial.println(analogRead(ESTADOJANELAQUARTO));
+    if(posicaoJanelaquarto > analogRead(ESTADOJANELAQUARTO)){
+      digitalWrite(MOTORQUARTOANTIHORARIO, LOW);
+      digitalWrite(MOTORQUARTOHORARIO, HIGH);
+    }else
+    if(posicaoJanelaquarto < analogRead(ESTADOJANELAQUARTO)){
+      digitalWrite(MOTORQUARTOHORARIO, LOW);
+      digitalWrite(MOTORQUARTOANTIHORARIO, HIGH);
+    }else{
+      digitalWrite(ENABLEQUARTO, LOW);
+      digitalWrite(MOTORQUARTOHORARIO, LOW);
+      digitalWrite(MOTORQUARTOANTIHORARIO, LOW);
+      controleJanelaquarto = 0;
+    }
+  }
+  desligaMotores();
+  if(controleJanelasala == 1){
+    Serial.print("Posicao usuario: "); Serial.print(posicaoJanelasala);
+    Serial.print(" Valor lido: ");Serial.println(analogRead(ESTADOJANELASALA));
+    if(posicaoJanelasala > analogRead(ESTADOJANELASALA)){
+      digitalWrite(MOTORSALAANTIHORARIO, LOW);
+      digitalWrite(MOTORSALAHORARIO, HIGH);
+    }else
+    if(posicaoJanelasala < analogRead(ESTADOJANELASALA)){
+      digitalWrite(MOTORSALAHORARIO, LOW);
+      digitalWrite(MOTORSALAANTIHORARIO, HIGH);
+    }else{
+      digitalWrite(ENABLESALA, LOW);
+      digitalWrite(MOTORSALAHORARIO, LOW);
+      digitalWrite(MOTORSALAANTIHORARIO, LOW);
+      controleJanelasala = 0;
+    }
+  }
+  desligaMotores();
+  
+}
+
 
 void temperaturaSala(){
   sensors.requestTemperatures();
   aux = sensors.getTempC(sensor);
-  if (aux != -127.00 && aux != 85){
+  if (aux != -127.00 && aux != 85 && aux != 0){
     tempC = aux;
   }
   sensors.requestTemperatures();
@@ -241,8 +338,6 @@ void temperaturaSala(){
 }
 
 int temptoBytes(int temp){
-
-
   return ((temp * 51)/10);
 }
 
@@ -308,11 +403,23 @@ void saladeestar(String msg){
     break;
   }
   case '4': // Duas portas digitais de saída 24V controlam (cima/baixo)
+            // Motor Janela Sala de estar
   {
     if(msg[3] == LEITURA){
-      
+      Serial.print("Posição da janela: ");
+      Serial.println(analogRead(ESTADOJANELASALA));
     }else if(msg[3] == ESCRITA){
-      
+      int m,c,d,u;
+      // Converte os valores recebidos em string para inteiros
+      m = (msg[6] - '0') * 1000;
+      c = (msg[7] - '0') * 100;
+      d = (msg[8] - '0') * 10;
+      u = (msg[9] - '0');
+      posicaoJanelasala = m+c+d+u;
+      Serial.print("Valor recebido: ");
+      Serial.println(posicaoJanelasala);
+      controleJanelasala = 1;
+      digitalWrite(ENABLESALA, HIGH);
     }
     break;
   }
@@ -369,9 +476,20 @@ void quartoebanheiro(String msg){
   case '1': // Janela do Quarto: Duas portas digitais de saída 24V controlam (cima/baixo)
   {
     if(msg[3] == LEITURA){
-
+      Serial.print("Posição da janela: ");
+      Serial.println(analogRead(ESTADOJANELAQUARTO));
     }else if(msg[3] == ESCRITA){
-        
+      int m,c,d,u;
+      // Converte os valores recebidos em string para inteiros
+      m = (msg[6] - '0') * 1000;
+      c = (msg[7] - '0') * 100;
+      d = (msg[8] - '0') * 10;
+      u = (msg[9] - '0');
+      posicaoJanelaquarto = m+c+d+u;
+      Serial.print("Valor recebido: ");
+      Serial.println(posicaoJanelaquarto);
+      controleJanelaquarto = 1;
+      digitalWrite(ENABLEQUARTO, HIGH);
     }
     break;
   }
@@ -391,9 +509,9 @@ void quartoebanheiro(String msg){
             // Time 3: full fechada (padrão 18:00h
   {
     if(msg[3] == LEITURA){
-
+      
     }else if(msg[3] == ESCRITA){
-        
+      
     }
     break;
   }

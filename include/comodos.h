@@ -18,6 +18,16 @@
 #define PORTAENTRADA 22
 #define TRAVAENTRADA 23
 
+#define ENABLESALA 42
+#define MOTORSALAHORARIO 43
+#define MOTORSALAANTIHORARIO 44
+#define ENABLEQUARTO 45
+#define MOTORQUARTOHORARIO 46
+#define MOTORQUARTOANTIHORARIO 47
+
+#define ESTADOJANELAQUARTO A14
+#define ESTADOJANELASALA A15
+
 
 extern RTC_DS1307 rtc; 
 
@@ -33,3 +43,6 @@ void ligaBuzzer();
 void desligaBuzzer();
 
 void temperaturaSala();
+
+void desligaMotores();
+void controlaMotores();

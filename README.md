@@ -20,7 +20,7 @@ habitação digital, de forma a adequar as necessidades das pessoas e otimizar a
 elétricas, tecnológicas e sustentáveis.
 
 <div align="center">
-   <img src="figura1.PNG" alt="figura1"/></center>
+   <img src="./Pictures/figura1.PNG" alt="figura1"/></center>
 </div>
 
 Na Figura 1, é mostrado um exemplo de controle onde a planta da casa é
@@ -42,7 +42,7 @@ Na Figura 2 é apresentada a planta baixa do apartamento escolhido para o projet
 como a disposição dos sensores e atuadores utilizados.
 
 <div align="center">
-   <img src="figura2.PNG" alt="figura2" width="50%" height="20%"/></center>
+   <img src="./Pictures/figura2.PNG" alt="figura2" width="50%" height="20%"/></center>
 </div>
 
 * **Descrição do controle
@@ -78,7 +78,7 @@ saída analógica deve ser utilizada, sendo 0V lâmpada desligada e 5V lâmpada 
 brilho máximo. Ver Figura 4.
 
 <div align="center">
-   <img src="figura4.PNG" alt="figura4" width="50%" height="20%"/></center>
+   <img src="./Pictures/figura4.PNG" alt="figura4" width="50%" height="20%"/></center>
 </div>
 
 * **Janelas da sala de estar e jantar:**
@@ -94,7 +94,7 @@ Horário (Time 2) para abertura total (Ex. 12:00 horas).
 Horário (Time 3) para fechamento total(Ex. 18:00 horas)
 
 <div align="center">
-   <img src="figura5.PNG" alt="figura5" width="50%" height="20%"/></center>
+   <img src="./Pictures/figura5.PNG" alt="figura5" width="50%" height="20%"/></center>
 </div>
 
 A posição de cada cortina também pode ser definida pelo usuário (Manual Mode),
@@ -119,5 +119,5 @@ deve ser configurado na página de parâmetros de configuração da interface WE
 6.
 
 <div align="center">
-   <img src="figura6.PNG" alt="figura6" width="50%" height="20%"/></center>
+   <img src="./Pictures/figura6.PNG" alt="figura6" width="50%" height="20%"/></center>
 </div>

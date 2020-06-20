@@ -8,7 +8,7 @@ void msgHandler();
 void msgInit();
 
 void schedule();
-
+uint8_t calculalrc(uint8_t *msg, uint8_t t);
 /*
 void static read_coil       (String msg);
 void static read_input      (String msg);

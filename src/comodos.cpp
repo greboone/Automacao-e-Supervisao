@@ -18,6 +18,8 @@ int valueSala = 0, valueQuarto = 0;
 int salaTemp = 0;
 int controleJanelaquarto = 0, controleJanelasala = 0;
 int posicaoJanelaquarto = 0, posicaoJanelasala = 0;
+int bandaMorta = 2;
+float tempAnterior;
 
 
 /*******************************************************************************************************/
@@ -28,6 +30,7 @@ void iniciaRtc(){
   pinMode(PORTAENTRADA, INPUT);
   pinMode(LUZQUARTO, OUTPUT);
   pinMode(LUZSALA, OUTPUT);
+  pinMode(AQUECEDOR, OUTPUT);
   pinMode(ENABLESALA, OUTPUT);
   pinMode(MOTORSALAHORARIO, OUTPUT);
   pinMode(MOTORSALAANTIHORARIO, OUTPUT);
@@ -37,6 +40,7 @@ void iniciaRtc(){
   
   digitalWrite(TRAVAENTRADA, HIGH);
   digitalWrite(BUZZER, LOW);
+  digitalWrite(AQUECEDOR, HIGH);
 
   Serial.println("Iniciando o RTC e Sensor de temperatura.");
 
@@ -468,6 +472,25 @@ void saladeestar(String msg){
 
 /*******************************************************************************************************/
 
+void controlaAquecedor(){
+  float temp=0;
+  temp = analogRead(LM35);
+  temp = (((temp) * 5 / (1023)) / 0.01);
+  //Serial.print("Temperatura lida: ");
+  //Serial.println(temp);
+
+  if(digitalRead(AQUECEDOR) == 1){
+    if((int)temp < 17){
+      digitalWrite(AQUECEDOR, LOW); // Liga Aquecedor
+      tempAnterior = temp;
+    }
+  }
+  if(digitalRead(AQUECEDOR) == 0){
+  if(tempAnterior+bandaMorta <= temp){
+    digitalWrite(AQUECEDOR, HIGH); // Desliga Aquecedor
+  }
+  }
+}
 
 void quartoebanheiro(String msg){
   Serial.println("Mensagem enviada para Quarto/Banheiro!");
@@ -536,9 +559,15 @@ void quartoebanheiro(String msg){
   case '5': // Sensor de Temperatura: Entrada LM35 Analógico 4-20V (Se < 17ºC, liga aquecedor)
   {
     if(msg[3] == LEITURA){
-
+      Serial.print("Temperatura do LM35: ");
+      Serial.println((float(analogRead(LM35)) * 5 / (1023)) / 0.01);
     }else if(msg[3] == ESCRITA){
-        
+      int d,u;
+
+      // Converte os valores recebidos em string para inteiros
+      d = (msg[8] - '0') * 10;
+      u = (msg[9] - '0');
+      bandaMorta = d + u;
     }
     break;
   }

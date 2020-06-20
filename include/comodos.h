@@ -18,6 +18,7 @@
 #define PORTAENTRADA 22
 #define TRAVAENTRADA 23
 
+#define AQUECEDOR 37
 #define ENABLESALA 42
 #define MOTORSALAHORARIO 43
 #define MOTORSALAANTIHORARIO 44
@@ -25,6 +26,7 @@
 #define MOTORQUARTOHORARIO 46
 #define MOTORQUARTOANTIHORARIO 47
 
+#define LM35 A13
 #define ESTADOJANELAQUARTO A14
 #define ESTADOJANELASALA A15
 
@@ -46,3 +48,5 @@ void temperaturaSala();
 
 void desligaMotores();
 void controlaMotores();
+
+void controlaAquecedor();

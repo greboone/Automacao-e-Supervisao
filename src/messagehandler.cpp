@@ -113,6 +113,7 @@ void schedule(){
   checkDoor(0);
   checkBuzzer();
   temperaturaSala();
+  controlaAquecedor();
 }
 
 /*

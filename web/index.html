@@ -56,15 +56,15 @@
 			
 			function cancelaAlarme()
 			{
-				var x = document.getElementById("senhaAlarme").value
-				socket.emit('Deactivate', [x])
+				var x = document.getElementById("senhaAlarme").value;
+				socket.emit('Deactivate', [x]);
 				console.log('HTML: tentando desativar alarme...');
 			}
 			
 			function abrePorta()
 			{
-				var x = document.getElementById("senhaPorta").value
-				socket.emit('OpDoor', [x])
+				var x = document.getElementById("senhaPorta").value;
+				socket.emit('OpDoor', [x]);
 				console.log('HTML: tentando abrir a porta...');
 			}
 			

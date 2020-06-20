@@ -450,8 +450,14 @@ parser.on('data', (data) => {
 	console.log("Enviando ultramsg...")
 	socket.emit('Monit', [end01, end11, end13, end16, end17, end23, end24, end25, end26]);//comunicação 'Monit', dado: end01 a end26
   }else{
-	//console.log("Enviando wind alert")
+
 	//if(data == ":170A0")//WIND ALERT AQUIIIIIIIIIIII
+	var test = data.split('');//se receber msg (unica) do endereço do sensor, manda wind alert
+	if(test[1] == '1' && test[2] == '7'){
+		console.log("Enviando wind alert");
+		socket.emit('WindLog', [windalert]);
+	}
+		
 	  
 	//msg padrão ":+9+2(LRC) === 0/1,2/3/4/5/6,7,8,9/10,11"
 	

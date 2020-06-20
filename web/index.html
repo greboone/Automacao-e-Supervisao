@@ -13,6 +13,17 @@
             var socket = io();
             var divConfig = 0;
             var divMonit = 0;
+            var divAlert = 0;
+
+            function divAlert() {
+                var x = document.getElementById("windAlert");
+
+                if (x.style.display === "none") {
+                    x.style.display = "block";
+                } else {
+                    x.style.display = "none";
+                }
+            }
 
             function config() {
                 var x = document.getElementById("config");
@@ -262,9 +273,10 @@
             </div>
 
             <div id="monit" style="display:none">
+            
                 <br>
-                <h2><span class="badge badge-info">TELA DE MONITORAMENTO E AÇÕES</span></h2>
-                
+                    <h2><span class="badge badge-info">TELA DE MONITORAMENTO E AÇÕES</span></h2>
+            
                 <div class="monitCards">
                     
                     <div class="card bg-light mb-3">
@@ -307,6 +319,13 @@
                                     <input id="velVento" class="form-control" type="text" readonly>
                                 </div>
                             </form>
+                            <br>        
+                            <div id="windAlert" class="alert alert-danger" role="alert">
+                                Wind Alert
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 

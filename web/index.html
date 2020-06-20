@@ -130,7 +130,7 @@
                 document.getElementById("statusPorta").value 			= x[0];	//(aberta, fechada, trancada) 				OK
                 document.getElementById("tempAmbiente").value 			= x[1]; //sensor de temperatura da sala de estar 	OK
 				document.getElementById("luzSala").value				= x[2]; //0-255										OK
-				document.getElementById("posCortina2").value 				= x[3];
+                document.getElementById("posCortina2").value 				= x[3];
                 document.getElementById("velVento").value 				= x[4]; //formato "xxx Km/h" 						OK
 				document.getElementById("posCortina1").value 				= x[5];
 				document.getElementById("luzQuartoBanheiro").value		= x[6];
@@ -226,17 +226,17 @@
                             <form>
                                 <div class="form-group">
                                     <b>Time 1</b>
-                                    <input id="timer1" class="form-control" placeholder="Digite o horário">
+                                    <input id="timer1" class="form-control" placeholder="Digite o horário" type="time">
                                     <small class="form-text text-muted">Horário para abertura da metade do curso da cortina.</small>
                                 </div>
                                 <div class="form-group">
                                     <b>Time 2</b>
-                                    <input id="timer2" class="form-control" placeholder="Digite o horário">
+                                    <input id="timer2" class="form-control" placeholder="Digite o horário" type="time">
                                     <small class="form-text text-muted">Horário para abertura total cortina.</small>
                                 </div>
                                 <div class="form-group">
                                     <b>Time 3</b>
-                                    <input id="timer3" class="form-control" placeholder="Digite o horário">
+                                    <input id="timer3" class="form-control" placeholder="Digite o horário" type="time">
                                     <small class="form-text text-muted">Horário para fechamento total da cortina.</small>
                                 </div>
                             </form>
@@ -320,7 +320,7 @@
                                 </div>
                             </form>
                             <br>        
-                            <div id="windAlert" class="alert alert-danger" role="alert">
+                            <div id="windAlert" class="alert alert-danger" role="alert" style="display:none">
                                 Wind Alert
                                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>

@@ -16,6 +16,60 @@ const myStyle1  = 'style.css'
 const myStyle2  = 'styleConfig.css'
 const myStyle3  = 'styleMonit.css'
 
+// Formata 1 em 01
+const zeroFill = n => {
+	return ('0' + n).slice(-2);
+}
+
+// Cria intervalo e monitora hora do sistema
+const interval = setInterval(() => {
+	// Pega o horário atual
+	const now = new Date();
+
+	// Formata a hora (hh:mm:ss)
+	const dataHora = zeroFill(now.getHours()) + ':' + zeroFill(now.getMinutes()) + ':' + zeroFill(now.getSeconds());
+	//console.log(dataHora); //hora mostrada no terminal
+	Hora = dataHora;
+
+	if(Hora == windop){
+		//envia comando ao firmware para abrir janelas
+		var mensagem = ':' + '14' + '1' + 'D' + '1' + '0204';//mensagem s/ lrc
+		msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();//calcula lrc e armazena aqui
+		var mensagemlrc = ':'+slaveAdr+slaveRW+slaveAD+slaveIO+slaveData+msglrc;//mensagem c/ lrc
+		sPort.write(mensagemlrc)
+		
+		var mensagem = ':' + '21' + '1' + 'D' + '1' + '0204';//mensagem s/ lrc
+		msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();//calcula lrc e armazena aqui
+		var mensagemlrc = ':'+slaveAdr+slaveRW+slaveAD+slaveIO+slaveData+msglrc;//mensagem c/ lrc
+		sPort.write(mensagemlrc)
+		
+	}else if(Hora == windhalf){
+		//envia comando ao firmware para deixar janelas meio abertas
+		var mensagem = ':' + '14' + '1' + 'D' + '1' + '0127';//mensagem s/ lrc
+		msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();//calcula lrc e armazena aqui
+		var mensagemlrc = ':'+slaveAdr+slaveRW+slaveAD+slaveIO+slaveData+msglrc;//mensagem c/ lrc
+		sPort.write(mensagemlrc)
+		
+		var mensagem = ':' + '21' + '1' + 'D' + '1' + '0127';//mensagem s/ lrc
+		msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();//calcula lrc e armazena aqui
+		var mensagemlrc = ':'+slaveAdr+slaveRW+slaveAD+slaveIO+slaveData+msglrc;//mensagem c/ lrc
+		sPort.write(mensagemlrc)
+		
+	}else if(Hora == windclose){
+		//envia comando ao firmware para fechar janelas
+		var mensagem = ':' + '14' + '1' + 'D' + '1' + '0051';//mensagem s/ lrc
+		msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();//calcula lrc e armazena aqui
+		var mensagemlrc = ':'+slaveAdr+slaveRW+slaveAD+slaveIO+slaveData+msglrc;//mensagem c/ lrc
+		sPort.write(mensagemlrc)
+		
+		var mensagem = ':' + '21' + '1' + 'D' + '1' + '0051';//mensagem s/ lrc
+		msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();//calcula lrc e armazena aqui
+		var mensagemlrc = ':'+slaveAdr+slaveRW+slaveAD+slaveIO+slaveData+msglrc;//mensagem c/ lrc
+		sPort.write(mensagemlrc)
+	}
+	
+}, 1000);//a cada segundo...
+
 /*---- Converte String para ArrayBUffer -----*/
 var convertStringToArrayBuffer = function (str) {
   var buf = new ArrayBuffer(str.length);
@@ -242,12 +296,15 @@ socket.on('connection', function(client) {
   //JANELAS DA SALA DE ESTAR E DE JANTAR (NOTA: ORGANIZAR RECEBIMENTO DO WIND ALERT)
   client.on('Windows', function(Data){//armazena em variaveis os horários de controle das janelas, com base nos dados recebidos (Data) na conexão Windows
     console.log('Recebido da web:' + Data);
-    var aux = Data[0] //meio aberto
-    windhalf = handleTime(aux);
-    aux = Data[1] //abre td
-    windop = handleTime(aux);
-    aux = Data[2]; //fecha td
-    windclose = handleTime(aux);
+	windhalf = Data[0] + ":00";
+	windop = Data[1] + ":00";
+	windclose = Data[2] + ":00";
+    //var aux = Data[0] //meio aberto
+    //windhalf = handleTime(aux);
+    //aux = Data[1] //abre td
+    //windop = handleTime(aux);
+    //aux = Data[2]; //fecha td
+    //windclose = handleTime(aux);
     console.log('Hora de abertura '+windop+', de intermedio '+windhalf+', e fechamento '+windclose+ ' armazenadas');
     //nada a retornar...
   })
@@ -294,9 +351,9 @@ var doorCloseTime = '0001'; //padrão 1 minuto
 var ACdeg = '0025';
 
 //horarios de controle das janelas (formato: HHMM)
-var windop = '0830'; //abre totalmente as 8:30
-var windhalf = '1600'; //meio abertas as 16:30
-var windclose = '1830'; //fecha totalmente as 18:30
+var windop = '08:00:00'; //abre totalmente as 8:00
+var windhalf = '12:00:00'; //meio abertas as 12:00
+var windclose = '18:00:00'; //fecha totalmente as 18:00
 
 //valor da banda morta, que controla o aquecedor
 var deadBand = '0';
@@ -304,10 +361,12 @@ var deadBand = '0';
 //mensagem de monitoração: conterá um array de strings com dados de sensores e atuadores monitorados
 var UltraMsg; //tamanho e formato: 4 caracteres * 9 itens contendo 36 caracteres no total
 
-//variavel de erro de senha
+//mensagens de erro
 var passerror = "senha incorreta";
-
 var windalert = "Vento muito forte, janelas sendo fechadas para sua segurança."
+
+//Hora atual
+var Hora = 0;
 
 var end01; //dispositivo de endereço 01, descrito no docs
 var end02; //dispositivo de endereço 02, descrito no docs
@@ -389,16 +448,16 @@ parser.on('data', (data) => {
 	//end21 = UltraMsg.slice(40, 44);
 	//end22 = UltraMsg.slice(44, 48);
 	
-	estado = UltraMsg.slice(12, 16); //end 16 pos. janela estar/jantar 0-1024
+	estado = UltraMsg.slice(12, 16); //end 14 pos. janela estar/jantar 0-1024
 	var aux = estado.split('');
 	if(Number(aux[0]) > 0){
-		end16 = aux[0]+aux[1]+aux[2]+aux[3];
+		end14 = aux[0]+aux[1]+aux[2]+aux[3];
 	}else if(Number(aux[1]) > 0){
-		end16 = aux[1]+aux[2]+aux[3];
+		end14 = aux[1]+aux[2]+aux[3];
 	}else if(Number(aux[2]) > 0){
-		end16 = aux[2]+aux[3];
+		end14 = aux[2]+aux[3];
 	}else{
-		end16 = aux[3];
+		end14 = aux[3];
 	}
 	
 	
@@ -406,16 +465,16 @@ parser.on('data', (data) => {
 	aux = estado.split('');
 	end17 = aux[1] + aux[2] + aux[3] + " Km/h"
 	
-	estado = UltraMsg.slice(20, 24); //end 23 pos. janela estar/jantar 0-1024
+	estado = UltraMsg.slice(20, 24); //end 21 pos. janela estar/jantar 0-1024
 	var aux = estado.split('');
 	if(Number(aux[0]) > 0){
-		end23 = aux[0]+aux[1]+aux[2]+aux[3];
+		end21 = aux[0]+aux[1]+aux[2]+aux[3];
 	}else if(Number(aux[1]) > 0){
-		end23 = aux[1]+aux[2]+aux[3];
+		end21 = aux[1]+aux[2]+aux[3];
 	}else if(Number(aux[2]) > 0){
-		end23 = aux[2]+aux[3];
+		end21 = aux[2]+aux[3];
 	}else{
-		end23 = aux[3];
+		end21 = aux[3];
 	}
 	
 	
@@ -448,7 +507,7 @@ parser.on('data', (data) => {
 			end26 = "Indefinido";
 	}
 	console.log("Enviando ultramsg...")
-	socket.emit('Monit', [end01, end11, end13, end16, end17, end23, end24, end25, end26]);//comunicação 'Monit', dado: end01 a end26
+	socket.emit('Monit', [end01, end11, end13, end14, end17, end21, end24, end25, end26]);//comunicação 'Monit', dado: end01 a end26
   }else{
 
 	//if(data == ":170A0")//WIND ALERT AQUIIIIIIIIIIII

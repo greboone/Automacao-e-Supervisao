@@ -109,6 +109,7 @@ if (Serial.available() > 0)
 }
 
 void schedule(){
+  controlaMotores();
   checkDoor(0);
   checkBuzzer();
   temperaturaSala();

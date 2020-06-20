@@ -185,6 +185,7 @@ socket.on('connection', function(client) {
 		sPort.write(mensagemlrc)
 		console.log('Senha correta, à desativar alarme...');
 	}else{//senha incorreta, manda mensagem de erro na comunicação DeactivateLog
+		console.log('Senha incorreta, enviando msg de erro ao front...');
 		socket.emit('DeactivateLog', [passerror])
 	}
   })
@@ -198,6 +199,7 @@ socket.on('connection', function(client) {
 		sPort.write(mensagemlrc)
 		console.log('Senha correta, à abrir a porta...');
 	}else{//senha incorreta, manda mensagem de erro na comunicação DeactivateLog
+		console.log('Senha incorreta, enviando msg de erro ao front...');
 		socket.emit('OpDoorLog', [passerror])
 	}
   })
@@ -256,6 +258,7 @@ socket.on('connection', function(client) {
     var aux = Data;
     deadBand = handleSize(aux);
     console.log('');
+	console.log('Deadband armazenado: ' + deadBand);
     //nada a retornar...
   })
   
@@ -265,7 +268,7 @@ socket.on('connection', function(client) {
 /***** Porta Serial *****/
 const SerialPort = require('serialport');
 const Readline = SerialPort.parsers.Readline;
-const sPort = new SerialPort('COM3', {
+const sPort = new SerialPort('COM7', {
   baudRate: 9600
 })
 const parser = new Readline();
@@ -363,7 +366,7 @@ parser.on('data', (data) => {
 			end01 = "Indefinido";
 	}
 	
-	estado = UltraMsg.slice(12, 16); //temperatura sala de estar
+	estado = UltraMsg.slice(4, 8); //end 11 temperatura sala de estar
 	var aux = estado.split('');
 	end11 = aux[2]+aux[3]+"ºC";
 	
@@ -371,7 +374,7 @@ parser.on('data', (data) => {
 	//end03 = UltraMsg.slice(8, 12); //Deactivate (alarme sonoro)
 	//end12 = UltraMsg.slice(16, 20); //autoAC (AC sala de estar )
 
-	estado = UltraMsg.slice(20, 24); //luz da sala de estar (pwm de 0-255)
+	estado = UltraMsg.slice(8, 12); //end 13 luz da sala de estar (pwm de 0-255)
 	var aux = estado.split('');
 	if(Number(aux[1])>0){
 		end13 = aux[1]+aux[2]+aux[3];
@@ -386,16 +389,37 @@ parser.on('data', (data) => {
 	//end21 = UltraMsg.slice(40, 44);
 	//end22 = UltraMsg.slice(44, 48);
 	
-	end16 = UltraMsg.slice(32, 36); //pos. janela estar/jantar
+	estado = UltraMsg.slice(12, 16); //end 16 pos. janela estar/jantar 0-1024
+	var aux = estado.split('');
+	if(Number(aux[0]) > 0){
+		end16 = aux[0]+aux[1]+aux[2]+aux[3];
+	}else if(Number(aux[1]) > 0){
+		end16 = aux[1]+aux[2]+aux[3];
+	}else if(Number(aux[2]) > 0){
+		end16 = aux[2]+aux[3];
+	}else{
+		end16 = aux[3];
+	}
 	
-	estado = UltraMsg.slice(36, 40); //wind speed (em Km/h)
+	
+	estado = UltraMsg.slice(16, 20); //end 17 wind speed (em Km/h)
 	aux = estado.split('');
 	end17 = aux[1] + aux[2] + aux[3] + " Km/h"
 	
-	end23 = UltraMsg.slice(48, 52); //pos. janela quarto
+	estado = UltraMsg.slice(20, 24); //end 23 pos. janela estar/jantar 0-1024
+	var aux = estado.split('');
+	if(Number(aux[0]) > 0){
+		end23 = aux[0]+aux[1]+aux[2]+aux[3];
+	}else if(Number(aux[1]) > 0){
+		end23 = aux[1]+aux[2]+aux[3];
+	}else if(Number(aux[2]) > 0){
+		end23 = aux[2]+aux[3];
+	}else{
+		end23 = aux[3];
+	}
 	
 	
-	estado = UltraMsg.slice(20, 24); //luz do quarto e banheiro (pwm de 0-255)
+	estado = UltraMsg.slice(24, 28); //end 24 luz do quarto e banheiro (pwm de 0-255)
 	var aux = estado.split('');
 	if(Number(aux[1])>0){
 		end24 = aux[1]+aux[2]+aux[3];
@@ -406,12 +430,12 @@ parser.on('data', (data) => {
 	}
 	
 	
-	estado = UltraMsg.slice(56, 60); //temperatura quarto/banheiro
+	estado = UltraMsg.slice(28, 32); //end 25 temperatura quarto/banheiro
 	var aux = estado.split('');
 	end25 = aux[2]+aux[3]+"ºC";
 	
 	
-	estado = UltraMsg.slice(60, 64);//end26 recebe 4 primeiros caracteres (0,1,2,3) da string tam 64 (0-3 from 0-63)
+	estado = UltraMsg.slice(32, 36);//end26 aquecedor
 	switch(estado)//estados da porta
 	{
 		case "0000":
@@ -423,13 +447,13 @@ parser.on('data', (data) => {
 		default:
 			end26 = "Indefinido";
 	}
-	
+	console.log("Enviando ultramsg...")
 	socket.emit('Monit', [end01, end11, end13, end16, end17, end23, end24, end25, end26]);//comunicação 'Monit', dado: end01 a end26
   }else{
-	
+	//console.log("Enviando wind alert")
 	//if(data == ":170A0")//WIND ALERT AQUIIIIIIIIIIII
 	  
-	//msg padrão ":+9+2(LRC) === 0/12/3/4/5/6789+LRC(10,11)"
+	//msg padrão ":+9+2(LRC) === 0/1,2/3/4/5/6,7,8,9/10,11"
 	
     //nota: não usado pra nada por enquanto...
     var msgarray = data.split(':');//string to char array, a partir do ':'

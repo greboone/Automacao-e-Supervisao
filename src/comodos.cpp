@@ -11,7 +11,14 @@ int controlBuzzer[4] = {2,0,0,0};
 int doorStatus;
 int doorPast;
 int doorTimer[4] = {0,0,0,0};
-int closeTimeout[3] = {0,1,30};
+int closeTimeout[2] = {0,0};
+
+float tempC, aux;
+int valueSala = 0, valueQuarto = 0;
+int salaTemp = 0;
+int controleJanelaquarto = 0, controleJanelasala = 0;
+int posicaoJanelaquarto = 0, posicaoJanelasala = 0;
+
 
 /*******************************************************************************************************/
 
@@ -19,27 +26,41 @@ void iniciaRtc(){
   pinMode(BUZZER, OUTPUT);
   pinMode(TRAVAENTRADA, OUTPUT);
   pinMode(PORTAENTRADA, INPUT);
+  pinMode(LUZQUARTO, OUTPUT);
+  pinMode(LUZSALA, OUTPUT);
+  pinMode(ENABLESALA, OUTPUT);
+  pinMode(MOTORSALAHORARIO, OUTPUT);
+  pinMode(MOTORSALAANTIHORARIO, OUTPUT);
+  pinMode(ENABLEQUARTO, OUTPUT);
+  pinMode(MOTORQUARTOHORARIO, OUTPUT);
+  pinMode(MOTORQUARTOANTIHORARIO, OUTPUT);
   
   digitalWrite(TRAVAENTRADA, HIGH);
   digitalWrite(BUZZER, LOW);
 
   Serial.println("Iniciando o RTC e Sensor de temperatura.");
-  if (! rtc.isrunning()) { //SE RTC NÃO ESTIVER SENDO EXECUTADO, FAZ
-    Serial.println("DS1307 rodando!"); //IMPRIME O TEXTO NO MONITOR SERIAL
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); //CAPTURA A DATA E HORA EM QUE O SKETCH É COMPILADO
-    rtc.adjust(DateTime(2020, 6, 13, 14, 00, 00)); //(ANO), (MÊS), (DIA), (HORA), (MINUTOS), (SEGUNDOS)
-  }
 
-  delay(1000);
+  rtc.begin();
+  rtc.isrunning();
+   //SE RTC NÃO ESTIVER SENDO EXECUTADO, FAZ
+    //Serial.println("DS1307 nao ta rodando!"); //IMPRIME O TEXTO NO MONITOR SERIAL
+  rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); //CAPTURA A DATA E HORA EM QUE O SKETCH É COMPILADO
+  //rtc.adjust(DateTime(2020, 6, 13, 14, 00, 00)); //(ANO), (MÊS), (DIA), (HORA), (MINUTOS), (SEGUNDOS)
+
+  delay(500);
   Serial.println("RTC OK!");
+  DateTime now = rtc.now();
+  Serial.print(now.year()); Serial.print("/"); Serial.print(now.month()); Serial.print("/"); Serial.println(now.day());
+  Serial.print(now.hour()); Serial.print(":"); Serial.print(now.minute()); Serial.print(":"); Serial.println(now.second());
+  Serial.println(now.unixtime());
+
   sensors.begin(); //INICIA O SENSOR
   sensors.getAddress(sensor, 0);
-  delay(1000); //INTERVALO DE 1 SEGUNDO
+  delay(500); //INTERVALO DE 1 SEGUNDO
   Serial.println("SENSOR OK!");
 }
 
-
-void checkDoor(int call){
+int checkDoor(int call){
   if(call == 0){
     DateTime now = rtc.now();
     if(digitalRead(PORTAENTRADA) == HIGH){
@@ -76,12 +97,14 @@ void checkDoor(int call){
   }else{
       if(digitalRead(PORTAENTRADA) == HIGH){
         Serial.println("Porta Fechada.");
+        return FECHADA;
       }else{
         Serial.println("Porta Aberta.");
+        return ABERTA;
       }
     }
 
-
+  return(0);
 }
 
 void portaentrada(String msg){
@@ -95,7 +118,14 @@ void portaentrada(String msg){
       checkDoor(1);
     }else if(msg[3] == ESCRITA){
       // escreve os valores de close timeout
-      
+      int H,h,M,m;
+      // Converte os valores recebidos em string para inteiros
+      H = (msg[6] - '0') * 10;
+      h = (msg[7] - '0');
+      closeTimeout[0] = H+h;
+      M = (msg[8] - '0') * 10;
+      m = (msg[9] - '0');
+      closeTimeout[1] = M+m;
     }
     break;
   }
@@ -114,8 +144,13 @@ void portaentrada(String msg){
         digitalWrite(TRAVAENTRADA, LOW);  // Abre trava
       }
       if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '0')){
-        Serial.println("Fechando trava.");
-        digitalWrite(TRAVAENTRADA, HIGH); // Fecha trava
+        if(checkDoor(1) == FECHADA){
+          Serial.println("Fechando trava.");
+          digitalWrite(TRAVAENTRADA, HIGH); // Fecha trava
+        }else{
+          Serial.println("Fechar a porta para trava-la");
+        }
+        
       }
     }
     break;
@@ -185,7 +220,7 @@ void checkBuzzer(){
       ligaBuzzer();
   }else{
     //Serial.print();
-    Serial.println(digitalRead(BUZZER));
+    //Serial.println(digitalRead(BUZZER));
   }
 }
 
@@ -201,18 +236,109 @@ void desligaBuzzer(){
 
 /*******************************************************************************************************/
 
+// Horario abre, Antihorario fecha
+// Motor Sala
+// Horario 43    Antihorario 44
+// Motor Quarto
+// Horario 46    Antihorario 47
 
-float tempC, aux;
+void desligaMotores(){
+  if(analogRead(ESTADOJANELAQUARTO) >= 819 || analogRead(ESTADOJANELAQUARTO) <= 204){
+    digitalWrite(MOTORQUARTOHORARIO, LOW);
+    digitalWrite(MOTORQUARTOANTIHORARIO, LOW);
+  }
+  if(analogRead(ESTADOJANELASALA) >= 819 || analogRead(ESTADOJANELASALA) <= 204){
+    digitalWrite(MOTORSALAHORARIO, LOW);
+    digitalWrite(MOTORSALAANTIHORARIO, LOW);
+  }
+  if(posicaoJanelaquarto ==  analogRead(ESTADOJANELAQUARTO) ||
+     posicaoJanelaquarto == (analogRead(ESTADOJANELAQUARTO) + 1) ||
+     posicaoJanelaquarto == (analogRead(ESTADOJANELAQUARTO) - 1) ||
+     posicaoJanelaquarto == (analogRead(ESTADOJANELAQUARTO) + 2) ||
+     posicaoJanelaquarto == (analogRead(ESTADOJANELAQUARTO) - 2) ||
+     posicaoJanelaquarto == (analogRead(ESTADOJANELAQUARTO) + 3) ||
+     posicaoJanelaquarto == (analogRead(ESTADOJANELAQUARTO) - 3) ||
+     posicaoJanelaquarto == (analogRead(ESTADOJANELAQUARTO) + 4) ||
+     posicaoJanelaquarto == (analogRead(ESTADOJANELAQUARTO) - 4) ||
+     posicaoJanelaquarto == (analogRead(ESTADOJANELAQUARTO) + 5) ||
+     posicaoJanelaquarto == (analogRead(ESTADOJANELAQUARTO) - 5)){
+        digitalWrite(ENABLEQUARTO, LOW);
+        digitalWrite(MOTORQUARTOHORARIO, LOW);
+        digitalWrite(MOTORQUARTOANTIHORARIO, LOW);
+        controleJanelaquarto = 0;
+  }
+  if(posicaoJanelasala ==  analogRead(ESTADOJANELASALA) ||
+     posicaoJanelasala == (analogRead(ESTADOJANELASALA) + 1) ||
+     posicaoJanelasala == (analogRead(ESTADOJANELASALA) - 1) ||
+     posicaoJanelasala == (analogRead(ESTADOJANELASALA) + 2) ||
+     posicaoJanelasala == (analogRead(ESTADOJANELASALA) - 2) ||
+     posicaoJanelasala == (analogRead(ESTADOJANELASALA) + 3) ||
+     posicaoJanelasala == (analogRead(ESTADOJANELASALA) - 3) ||
+     posicaoJanelasala == (analogRead(ESTADOJANELASALA) + 4) ||
+     posicaoJanelasala == (analogRead(ESTADOJANELASALA) - 4) ||
+     posicaoJanelasala == (analogRead(ESTADOJANELASALA) + 5) ||
+     posicaoJanelasala == (analogRead(ESTADOJANELASALA) - 5)){
+        digitalWrite(ENABLESALA, LOW);
+        digitalWrite(MOTORSALAHORARIO, LOW);
+        digitalWrite(MOTORSALAANTIHORARIO, LOW);
+        controleJanelasala = 0;
+  }
+}
+
+void controlaMotores(){
+  if(controleJanelaquarto == 1){
+    Serial.print("Posicao usuario: "); Serial.print(posicaoJanelaquarto);
+    Serial.print(" Valor lido: ");Serial.println(analogRead(ESTADOJANELAQUARTO));
+    if(posicaoJanelaquarto > analogRead(ESTADOJANELAQUARTO)){
+      digitalWrite(MOTORQUARTOANTIHORARIO, LOW);
+      digitalWrite(MOTORQUARTOHORARIO, HIGH);
+    }else
+    if(posicaoJanelaquarto < analogRead(ESTADOJANELAQUARTO)){
+      digitalWrite(MOTORQUARTOHORARIO, LOW);
+      digitalWrite(MOTORQUARTOANTIHORARIO, HIGH);
+    }else{
+      digitalWrite(ENABLEQUARTO, LOW);
+      digitalWrite(MOTORQUARTOHORARIO, LOW);
+      digitalWrite(MOTORQUARTOANTIHORARIO, LOW);
+      controleJanelaquarto = 0;
+    }
+  }
+  desligaMotores();
+  if(controleJanelasala == 1){
+    Serial.print("Posicao usuario: "); Serial.print(posicaoJanelasala);
+    Serial.print(" Valor lido: ");Serial.println(analogRead(ESTADOJANELASALA));
+    if(posicaoJanelasala > analogRead(ESTADOJANELASALA)){
+      digitalWrite(MOTORSALAANTIHORARIO, LOW);
+      digitalWrite(MOTORSALAHORARIO, HIGH);
+    }else
+    if(posicaoJanelasala < analogRead(ESTADOJANELASALA)){
+      digitalWrite(MOTORSALAHORARIO, LOW);
+      digitalWrite(MOTORSALAANTIHORARIO, HIGH);
+    }else{
+      digitalWrite(ENABLESALA, LOW);
+      digitalWrite(MOTORSALAHORARIO, LOW);
+      digitalWrite(MOTORSALAANTIHORARIO, LOW);
+      controleJanelasala = 0;
+    }
+  }
+  desligaMotores();
+  
+}
+
 
 void temperaturaSala(){
   sensors.requestTemperatures();
   aux = sensors.getTempC(sensor);
-  if (aux != -127.00 && aux != 85){
+  if (aux != -127.00 && aux != 85 && aux != 0){
     tempC = aux;
   }
   sensors.requestTemperatures();
   //Serial.print("Aux: ");
   //Serial.println(aux);
+}
+
+int temptoBytes(int temp){
+  return ((temp * 51)/10);
 }
 
 void saladeestar(String msg){
@@ -239,39 +365,61 @@ void saladeestar(String msg){
             // saída analógica 5V (temp = Tensão*10, temp > 0 && temp < 50)
   {
     if(msg[3] == LEITURA){
-
+      Serial.print("Valor de temperatura configurado: ");
+      Serial.println(salaTemp);
     }else if(msg[3] == ESCRITA){
-        
+      int T,t;
+      // Converte os valores recebidos em string para inteiros
+      T = (msg[8] - '0') * 10;
+      t = (msg[9] - '0');
+      salaTemp = T+t;
+      Serial.print("Valor recebido: ");
+      Serial.println(salaTemp);
+      if(salaTemp > 50 || salaTemp < 17){
+        Serial.println("Valor de temperatura invalido!");
+        break;
+      }
+      analogWrite(ACSALA,temptoBytes(salaTemp));
     }
     break;
   }
   case '3': // Luz de estar: saída analógica 5V (0 = off, 5V = brilho max)
   {
     if(msg[3] == LEITURA){
-      int value = 0;
-      value = analogRead(LUZSALA);
-      value = map(value, 0, 1023, 0, 255);
+      
       Serial.print("Luz da sala em ");
-      Serial.println(value);
+      Serial.println(valueSala);
     }else if(msg[3] == ESCRITA){
       int c,d,u;
       // Converte os valores recebidos em string para inteiros
       c = (msg[7] - '0') * 100;
       d = (msg[8] - '0') * 10;
       u = (msg[9] - '0');
-      u = c + d + u;
+      valueSala = c + d + u;
       if(u <= 255 || u >= 0){
-        analogWrite(LUZSALA, u);
+        analogWrite(LUZSALA, valueSala);
       }
     }
     break;
   }
   case '4': // Duas portas digitais de saída 24V controlam (cima/baixo)
+            // Motor Janela Sala de estar
   {
     if(msg[3] == LEITURA){
-
+      Serial.print("Posição da janela: ");
+      Serial.println(analogRead(ESTADOJANELASALA));
     }else if(msg[3] == ESCRITA){
-        
+      int m,c,d,u;
+      // Converte os valores recebidos em string para inteiros
+      m = (msg[6] - '0') * 1000;
+      c = (msg[7] - '0') * 100;
+      d = (msg[8] - '0') * 10;
+      u = (msg[9] - '0');
+      posicaoJanelasala = m+c+d+u;
+      Serial.print("Valor recebido: ");
+      Serial.println(posicaoJanelasala);
+      controleJanelasala = 1;
+      digitalWrite(ENABLESALA, HIGH);
     }
     break;
   }
@@ -288,7 +436,7 @@ void saladeestar(String msg){
             // 3 Horários padronizados
             // Time 1: meio aberta (padrão 8:00h)
             // Time 2: full aberta (padrão 12:00h)
-            // Time 3: full fechada (padrão 18:00h
+            // Time 3: full fechada (padrão 18:00h)
   {
     if(msg[3] == LEITURA){
 
@@ -328,9 +476,20 @@ void quartoebanheiro(String msg){
   case '1': // Janela do Quarto: Duas portas digitais de saída 24V controlam (cima/baixo)
   {
     if(msg[3] == LEITURA){
-
+      Serial.print("Posição da janela: ");
+      Serial.println(analogRead(ESTADOJANELAQUARTO));
     }else if(msg[3] == ESCRITA){
-        
+      int m,c,d,u;
+      // Converte os valores recebidos em string para inteiros
+      m = (msg[6] - '0') * 1000;
+      c = (msg[7] - '0') * 100;
+      d = (msg[8] - '0') * 10;
+      u = (msg[9] - '0');
+      posicaoJanelaquarto = m+c+d+u;
+      Serial.print("Valor recebido: ");
+      Serial.println(posicaoJanelaquarto);
+      controleJanelaquarto = 1;
+      digitalWrite(ENABLEQUARTO, HIGH);
     }
     break;
   }
@@ -350,29 +509,26 @@ void quartoebanheiro(String msg){
             // Time 3: full fechada (padrão 18:00h
   {
     if(msg[3] == LEITURA){
-
+      
     }else if(msg[3] == ESCRITA){
-        
+      
     }
     break;
   }
   case '4': // Luz quarto: saída analógica 5V (0 = off, 5V = brilho max)
   {
     if(msg[3] == LEITURA){
-      int value = 0;
-      value = analogRead(LUZQUARTO);
-      value = map(value, 0, 1023, 0, 255);
       Serial.print("Luz da sala em ");
-      Serial.println(value);
+      Serial.println(valueQuarto);
     }else if(msg[3] == ESCRITA){
       int c,d,u;
       // Converte os valores recebidos em string para inteiros
       c = (msg[7] - '0') * 100;
       d = (msg[8] - '0') * 10;
       u = (msg[9] - '0');
-      u = c + d + u;
+      valueQuarto = c + d + u;
       if(u <= 255 || u >= 0){
-        analogWrite(LUZQUARTO, u);
+        analogWrite(LUZQUARTO, valueQuarto);
       }
     }
     break;

@@ -118,14 +118,10 @@
 
                 document.getElementById("statusPorta").value 			= x[0];	//(aberta, fechada, trancada) 				OK
                 document.getElementById("tempAmbiente").value 			= x[1]; //sensor de temperatura da sala de estar 	OK
-				document.getElementById("luzSala").value				= x[2];
-				
-				// AQUI: implementar posição de janela, endereço 16, indice 3
-				
+				document.getElementById("luzSala").value				= x[2]; //0-255										OK
+				document.getElementById("posCortina2").value 				= x[3];
                 document.getElementById("velVento").value 				= x[4]; //formato "xxx Km/h" 						OK
-				
-                // AQUI: implementar posição de janela, endereço 23, indice 5
-				
+				document.getElementById("posCortina1").value 				= x[5];
 				document.getElementById("luzQuartoBanheiro").value		= x[6];
                 document.getElementById("tempQuartoBanheiro").value 	= x[7]; //sensor de temperatura do quarto/banheiro	OK
                 document.getElementById("statusAquecedor").value 		= x[8]; //(ligado/desligado)						OK
@@ -359,7 +355,7 @@
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-success" data-dismiss="modal">Confirmar</button>
+                                                <button type="button" onclick="cancelaAlarme()" class="btn btn-success" data-dismiss="modal">Confirmar</button>
                                             </div>
                                         </div>
                                     </div>
@@ -384,7 +380,7 @@
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-success" data-dismiss="modal">Confirmar</button>
+                                                <button type="button" onclick="abrePorta()" class="btn btn-success" data-dismiss="modal">Confirmar</button>
                                             </div>
                                         </div>
                                     </div>
@@ -426,13 +422,16 @@
                                                             <br>      
                                                             <input id="tempArCondicionado" type="number" value="17" min="17" max="25" step="1">
                                                         </form>
+														<div class="modal-footer">
+															<button type="button" onclick="action(12,1,'A',1, document.getElementById('tempArCondicionado').value)" class="btn btn-success" data-dismiss="modal">Confirmar</button>
+														</div>
                                                     </div>
                                                 </div>
                                                
                                                 <br>
 
                                                 <p>
-                                                    <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#desativarManualMode" aria-expanded="false" aria-controls="desativarManualMode">
+                                                    <button class="btn btn-primary" type="button" onclick="action(12,1,'A',1,'0000'), autoAC()" data-toggle="collapse" data-target="#desativarManualMode" aria-expanded="false" aria-controls="desativarManualMode">
                                                       Desativar Manual Mode
                                                     </button>
                                                   </p>
@@ -442,9 +441,7 @@
                                                         </div>
                                                   </div>
                                             </div>
-                                            <div class="modal-footer">
-                                                <button type="button" onclick="action(12,1,'A',1, document.getElementById('tempArCondicionado').value)" class="btn btn-success" data-dismiss="modal">Confirmar</button>
-                                            </div>
+                                            
                                         </div>
                                     </div>
                                 </div>
@@ -487,14 +484,14 @@
                                                     <b>Posição da cortina do Quarto</b>
                                                     <div class="slidecontainer">
                                                         <label>Fechada</label>
-                                                        <input id="posCortina" type="range" min="0" max="1023" value="50" class="slider" onchange="action(16,1,'A',0,document.getElementById('posCortina').value)">
+                                                        <input id="posCortina1" type="range" min="0" max="1023" value="0" class="slider" onchange="action(23,1,'A',0,document.getElementById('posCortina1').value)">
                                                         <label>Aberta</label>
                                                     </div>
                                                     <br>
                                                     <b>Posição da cortina da Sala</b>
                                                     <div class="slidecontainer">
                                                         <label>Fechada</label>
-                                                        <input id="posCortina" type="range" min="0" max="1023" value="50" class="slider" onchange="action(16,1,'A',0,document.getElementById('posCortina').value)">
+                                                        <input id="posCortina2" type="range" min="0" max="1023" value="0" class="slider" onchange="action(16,1,'A',0,document.getElementById('posCortina2').value)">
                                                         <label>Aberta</label>
                                                     </div>
                                                 </div>
@@ -503,7 +500,7 @@
                                             <br>
                 
                                             <p>
-                                                <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#desativarManualModeJanelas" aria-expanded="false" aria-controls="desativarManualModeJanelas">
+                                                <button class="btn btn-primary" type="button" onclick="action(16,1,'A',0,1111), action(23,1,'A',0,1111)" data-toggle="collapse" data-target="#desativarManualModeJanelas" aria-expanded="false" aria-controls="desativarManualModeJanelas">
                                                   Desativar Manual Mode
                                                 </button>
                                               </p>
@@ -514,7 +511,7 @@
                                               </div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" onclick="action(12,1,'A',1, document.getElementById('tempArCondicionado').value)" class="btn btn-success" data-dismiss="modal">Confirmar</button>
+                                            <button type="button" class="btn btn-success" data-dismiss="modal">Confirmar</button>
                                         </div>
                                     </div>
                                 </div>

@@ -114,6 +114,7 @@ void schedule(){
   checkBuzzer();
   temperaturaSala();
   controlaAquecedor();
+  controlaVento();
 }
 
 /*

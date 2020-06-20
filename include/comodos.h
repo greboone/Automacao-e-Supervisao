@@ -26,6 +26,7 @@
 #define MOTORQUARTOHORARIO 46
 #define MOTORQUARTOANTIHORARIO 47
 
+#define VENTO A12
 #define LM35 A13
 #define ESTADOJANELAQUARTO A14
 #define ESTADOJANELASALA A15
@@ -50,3 +51,4 @@ void desligaMotores();
 void controlaMotores();
 
 void controlaAquecedor();
+void controlaVento();

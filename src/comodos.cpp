@@ -468,6 +468,10 @@ int controlaVento(){
   tensao = (5 * wind)/1023;
   wind = (tensao - 0.36206896551)/0.0275862069;
 
+  if(wind < 0){
+    wind = 0;
+  }
+
   if(wind >= 50){
     if(analogRead(ESTADOJANELAQUARTO) > 204){
       digitalWrite(ENABLEQUARTO, HIGH);

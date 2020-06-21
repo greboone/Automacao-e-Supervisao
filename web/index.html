@@ -15,16 +15,6 @@
             var divMonit = 0;
             var divAlert = 0;
 
-            function divAlert() {
-                var x = document.getElementById("windAlert"); 
-
-                if (x.style.display === "none") {
-                    x.style.display = "block";
-                } else {
-                    x.style.display = "none";
-                }
-            }
-
             function config() {
                 var x = document.getElementById("config");
 
@@ -143,18 +133,54 @@
 				}
 			});
 			
+            // funções para mudar o estado do display dos alertas quando o usuario fechar a modal
+            function windAlert (){
+                var x = document.getElementById("windAlert");
+                
+                if (x.style.display === "none" && divConfig == 0) {
+                    x.style.display = "block";
+                } else {
+                    x.style.display = "none";
+                } 
+            }
+
+            function passwordDoor (){
+                var x = document.getElementById("passwordDoor");
+                
+                if (x.style.display === "none" && divConfig == 0) {
+                    x.style.display = "block";
+                } else {
+                    x.style.display = "none";
+                } 
+            }
+
+            function passwordAlarm (){
+                var x = document.getElementById("passwordAlarm");
+                
+                if (x.style.display === "none" && divConfig == 0) {
+                    x.style.display = "block";
+                } else {
+                    x.style.display = "none";
+                } 
+            }
 			
 			//quando a senha informada p/ desativar alarme é incorreta
 			socket.on('DeactivateLog', function(erro){
 				//aki ativar o mostrar da mensagem de erro do passwordAlarm
+                var x = document.getElementById("windAlert"); 
+                x.style.display = "block";            
 			})
 			
 			socket.on('OpDoorLog', function(erro){
 				//aki ativar o mostrar da mensagem de erro do passwordDoor
+                var x = document.getElementById("passwordDoor"); 
+                x.style.display = "block";            
 			})
 			
 			socket.on('WindLog', function(erro){
 				//aki ativar o mostrar da mensagem de erro do windAlert
+                var x = document.getElementById("passwordAlarm"); 
+                x.style.display = "block";
 			})
 			
 			//A fazer: terminar comunicação Monit
@@ -325,9 +351,8 @@
                                 </div>
                             </form>
                             <br>        
-                            <div id="windAlert" class="alert alert-danger" role="alert">
-                                Wind Alert
-                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <div id="windAlert" class="alert alert-danger" role="alert" style="display:none">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close"  onclick="windAlert()">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
@@ -378,9 +403,9 @@
                                                 </div>
                                                 </form>
                                                 <br>
-                                                <div id="passwordAlarm" class="alert alert-warning" role="alert">
+                                                <div id="passwordAlarm" class="alert alert-warning" role="alert" style="display:none">
                                                     Senha incorreta!
-                                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"  onclick="passwordAlarm()">
                                                         <span aria-hidden="true">&times;</span>
                                                     </button>
                                                 </div>
@@ -410,9 +435,9 @@
                                                 </div>
                                                 </form>
                                                 <br>
-                                                <div value="" id="passwordDoor" class="alert alert-warning" role="alert">
+                                                <div value="" id="passwordDoor" class="alert alert-warning" role="alert" style="display:none">
                                                     
-                                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"  onclick="config()">
                                                         <span aria-hidden="true">&times;</span>
                                                     </button>
                                                 </div>

@@ -162,14 +162,16 @@ function handleSize(text){
 
 //recebe minutos e retorna em formato HHMM
 function convertMinToHHMM(min){
-	if((min/60) >= 1){//calcula hora
-		var hour = (Math.trunc((min/60))).toString();
+	console.log("recebido " + min + " minuto(s)")
+	if((min/60.0) >= 1){//calcula hora
+		var hour = (min/60).toString();
 		var minute = (min%60).toString();
 		var retorno = hour + minute;
 		return retorno;
 	}else{
 		var hour = "00";
 		var minute = min.toString();
+		if(minute.length()<2) minute = '0' + min
 		var retorno = hour + minute;
 		return retorno;
 	}
@@ -238,9 +240,10 @@ socket.on('connection', function(client) {
 		var mensagemlrc = ':'+slaveAdr+slaveRW+slaveAD+slaveIO+slaveData+msglrc;//mensagem c/ lrc
 		sPort.write(mensagemlrc)
 		console.log('Senha correta, à desativar alarme...');
+		socket.emit('DeactivateLog', [])
 	}else{//senha incorreta, manda mensagem de erro na comunicação DeactivateLog
 		console.log('Senha incorreta, enviando msg de erro ao front...');
-		socket.emit('DeactivateLog', [passerror])
+		socket.emit('DeactivateLogError', [passerror])
 	}
   })
   
@@ -252,9 +255,10 @@ socket.on('connection', function(client) {
 		var mensagemlrc = ':'+slaveAdr+slaveRW+slaveAD+slaveIO+slaveData+msglrc;//mensagem c/ lrc
 		sPort.write(mensagemlrc)
 		console.log('Senha correta, à abrir a porta...');
+		socket.emit('OpDoorLog', [])
 	}else{//senha incorreta, manda mensagem de erro na comunicação DeactivateLog
 		console.log('Senha incorreta, enviando msg de erro ao front...');
-		socket.emit('OpDoorLog', [passerror])
+		socket.emit('OpDoorLogError', [passerror])
 	}
   })
   
@@ -273,8 +277,8 @@ socket.on('connection', function(client) {
   client.on('Entry', function(Data){//armazena em variavel senha e envia ao firmware o time de fechamento da porta com base nos dados recebidos (Data) na conexão Entry
     console.log('Recebido da web: ' + Data);
     pass = Data[0];
-    var dct = Data[1];
-    doorCloseTime = convertMinToHHMM(Number(dct));//transforma em numero e converte no formato HHMM
+    var dct = handleSize(Data[1]);
+    doorCloseTime = convertMinToHHMM(parseFloat(dct));//transforma em numero e converte no formato HHMM
 	var mensagem = ':' + '01' + '1' + 'D' + '0' + doorCloseTime;//mensagem s/ lrc
     console.log('Senha '+pass+' e tempo de destravamento '+doorCloseTime+' armazenados');
     msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();

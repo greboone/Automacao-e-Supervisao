@@ -8,7 +8,7 @@ var   fs = require('fs');
 const port = 3000
 
 //tamanho de mensagem de monitoramento (mais detalhes na descrição de UltraMsg)
-const monitsize = 36
+const monitsize = 28
 
 // pagina principal
 const mainPage = 'index.html'
@@ -333,7 +333,7 @@ socket.on('connection', function(client) {
 /***** Porta Serial *****/
 const SerialPort = require('serialport');
 const Readline = SerialPort.parsers.Readline;
-const sPort = new SerialPort('COM7', {
+const sPort = new SerialPort('COM4', {
   baudRate: 9600
 })
 const parser = new Readline();
@@ -367,7 +367,7 @@ var windclose = '18:00:00'; //fecha totalmente as 18:00
 var deadBand = '0';
 
 //mensagem de monitoração: conterá um array de strings com dados de sensores e atuadores monitorados
-var UltraMsg; //tamanho e formato: 4 caracteres * 9 itens contendo 36 caracteres no total
+var UltraMsg; //tamanho e formato: 4 caracteres * 7 itens contendo 28 caracteres no total
 
 //mensagens de erro
 var passerror = "senha incorreta";
@@ -404,8 +404,8 @@ sPort.open(function (err) {
 //tratamento de mensagens recebidas do arduino (respostas)
 parser.on('data', (data) => {
   console.log('Node recebe do controlador: '+data);
-
-  if(data.length >= monitsize){	//>=36
+//com
+  if(data.length >= monitsize){	//>=28
     /////////////     MENSAGENS DE MONITORAMENTO     /////////////
     //Formato segue conforme a descrição no arquivo disponível no docs, de item a item
     //link do docs: https://docs.google.com/document/d/10i8FvYkEybzUDhKXuwmf3X4So2C-hNTiveFeKyaUtrA/edit
@@ -440,16 +440,6 @@ parser.on('data', (data) => {
 	//end02 = UltraMsg.slice(4, 8); //OpDoor (solenoide da porta)
 	//end03 = UltraMsg.slice(8, 12); //Deactivate (alarme sonoro)
 	//end12 = UltraMsg.slice(16, 20); //autoAC (AC sala de estar )
-
-	estado = UltraMsg.slice(8, 12); //end 13 luz da sala de estar (pwm de 0-255)
-	var aux = estado.split('');
-	if(Number(aux[1])>0){
-		end13 = aux[1]+aux[2]+aux[3];
-	}else if(Number(aux[2])>0){
-		end13 = aux[2]+aux[3];
-	}else{
-		end13 = aux[3];
-	}
 	
 	//end14 = UltraMsg.slice(24, 28); //motores de janela não utilizados pela web, o uso de sliders controla pelo sensor de posicionamento
 	//end15 = UltraMsg.slice(28, 32);
@@ -486,17 +476,6 @@ parser.on('data', (data) => {
 	}
 	
 	
-	estado = UltraMsg.slice(24, 28); //end 24 luz do quarto e banheiro (pwm de 0-255)
-	var aux = estado.split('');
-	if(Number(aux[1])>0){
-		end24 = aux[1]+aux[2]+aux[3];
-	}else if(Number(aux[2])>0){
-		end24 = aux[2]+aux[3];
-	}else{
-		end24 = aux[3];
-	}
-	
-	
 	estado = UltraMsg.slice(28, 32); //end 25 temperatura quarto/banheiro
 	var aux = estado.split('');
 	end25 = aux[2]+aux[3]+"ºC";
@@ -515,7 +494,7 @@ parser.on('data', (data) => {
 			end26 = "Indefinido";
 	}
 	console.log("Enviando ultramsg...")
-	socket.emit('Monit', [end01, end11, end13, end14, end17, end21, end24, end25, end26]);//comunicação 'Monit', dado: end01 a end26
+	socket.emit('Monit', [end01, end11, end14, end17, end21, end25, end26]);//comunicação 'Monit', dado: end01 a end26
   }else{
 
 	//if(data == ":170A0")//WIND ALERT AQUIIIIIIIIIIII

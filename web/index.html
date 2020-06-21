@@ -118,13 +118,11 @@
 
                 document.getElementById("statusPorta").value 			= x[0];	//(aberta, fechada, trancada) 				OK
                 document.getElementById("tempAmbiente").value 			= x[1]; //sensor de temperatura da sala de estar 	OK
-				document.getElementById("luzSala").value				= x[2]; //0-255										OK
-                document.getElementById("posCortina2").value 				= x[3];
-                document.getElementById("velVento").value 				= x[4]; //formato "xxx Km/h" 						OK
-				document.getElementById("posCortina1").value 				= x[5];
-				document.getElementById("luzQuartoBanheiro").value		= x[6];
-                document.getElementById("tempQuartoBanheiro").value 	= x[7]; //sensor de temperatura do quarto/banheiro	OK
-                document.getElementById("statusAquecedor").value 		= x[8]; //(ligado/desligado)						OK
+                document.getElementById("posCortina2").value 			= x[2]; //tipo pwm
+                document.getElementById("velVento").value 				= x[3]; //formato "xxx Km/h" 						OK
+				document.getElementById("posCortina1").value 			= x[4]; //tipo pwm
+                document.getElementById("tempQuartoBanheiro").value 	= x[5]; //sensor de temperatura do quarto/banheiro	OK
+                document.getElementById("statusAquecedor").value 		= x[6]; //(ligado/desligado)						OK
 
 				for(i = 0; i < 7; i++)
 				{

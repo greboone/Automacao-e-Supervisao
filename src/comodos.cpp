@@ -4,7 +4,7 @@ OneWire oneWire(DS18B20);             //CONFIGURA UMA INSTÂNCIA ONEWIRE PARA SE
 DallasTemperature sensors(&oneWire);  //BIBLIOTECA DallasTemperature UTILIZA A OneWire
 DeviceAddress sensor;
 
-/***************************************Variaveis para o Buzzer*****************************************/
+/*******************************************************************************************************/
 
 String retorno[28];// = "0000000000000000000000000000";
 
@@ -14,14 +14,14 @@ int doorStatus;
 int doorPast;
 int doorTimer[4] = {0,0,0,0};
 int closeTimeout[2] = {0,0};
-
-float tempC, aux;
 int valueSala = 0, valueQuarto = 0;
 int salaTemp = 0;
 int controleJanelaquarto = 0, controleJanelasala = 0;
 int posicaoJanelaquarto = 0, posicaoJanelasala = 0;
 int bandaMorta = 2;
+
 float tempAnterior;
+float tempC, aux;
 
 
 /*******************************************************************************************************/
@@ -65,6 +65,8 @@ void iniciaRtc(){
   delay(500); //INTERVALO DE 1 SEGUNDO
   Serial.println("SENSOR OK!");
 }
+
+/*******************************************************************************************************/
 
 int checkDoor(int call){
   if(call == 0){
@@ -210,8 +212,7 @@ void portaentrada(String msg){
 }
 
 
-/***********************************Funcoes para o Buzzer***********************************************/
-
+/*******************************************************************************************************/
 
 void ligaBuzzer(){
   DateTime now = rtc.now();
@@ -255,12 +256,6 @@ void desligaBuzzer(){
 }
 
 /*******************************************************************************************************/
-
-// Horario abre, Antihorario fecha
-// Motor Sala
-// Horario 43    Antihorario 44
-// Motor Quarto
-// Horario 46    Antihorario 47
 
 void desligaMotores(){
   if(analogRead(ESTADOJANELAQUARTO) >= 819 || analogRead(ESTADOJANELAQUARTO) <= 204){
@@ -355,13 +350,13 @@ void temperaturaSala(){
 
   if (!sensors.getAddress(sensor, 0))
   {
-    Serial.println("Sensores nao encontrados !");
+    //Serial.println("Sensores nao encontrados !");
   }
 
-  Serial.print("Aux: ");
-  Serial.print(aux);
-  Serial.print(" Temp: ");
-  Serial.println(tempC);
+  // Serial.print("Aux: ");
+  // Serial.print(aux);
+  // Serial.print(" Temp: ");
+  // Serial.println(tempC);
 }
 
 int temptoBytes(int temp){

@@ -231,7 +231,7 @@ socket.on('connection', function(client) {
         slaveData = handleSize(Data[4]) //dados: 0000 / 0001 / 0255 / 1024...
 		var mensagem = ':' + slaveAdr + slaveRW + slaveAD + slaveIO + slaveData;//mensagem s/ lrc
 		msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();//calcula lrc e armazena aqui
-		var mensagemlrc = ':'+slaveAdr+slaveRW+slaveAD+slaveIO+slaveData+msglrc;//mensagem c/ lrc
+		var mensagemlrc = mensagem+msglrc;//mensagem c/ lrc
 		sPort.write(mensagemlrc)
 		//nada a retornar...
   })
@@ -242,7 +242,7 @@ socket.on('connection', function(client) {
     if(Data == pass){//senha correta, envia comando ao firmware para desligar alarme
 		var mensagem = ':' + '03' + '1' + 'D' + '1' + '0000';//mensagem s/ lrc
 		msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();//calcula lrc e armazena aqui
-		var mensagemlrc = ':'+slaveAdr+slaveRW+slaveAD+slaveIO+slaveData+msglrc;//mensagem c/ lrc
+		var mensagemlrc = mensagem+msglrc;//mensagem c/ lrc
 		sPort.write(mensagemlrc)
 		console.log('Senha correta, à desativar alarme...');
 		socket.emit('DeactivateLog', [])
@@ -257,7 +257,7 @@ socket.on('connection', function(client) {
     if(Data == pass){//senha correta, envia comando ao firmware para abrir...
 		var mensagem = ':' + '02' + '1' + 'D' + '1' + '0000';//mensagem s/ lrc
 		msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();//calcula lrc e armazena aqui
-		var mensagemlrc = ':'+slaveAdr+slaveRW+slaveAD+slaveIO+slaveData+msglrc;//mensagem c/ lrc
+		var mensagemlrc = mensagem+msglrc;//mensagem c/ lrc
 		sPort.write(mensagemlrc)
 		console.log('Senha correta, à abrir a porta...');
 		socket.emit('OpDoorLog', [])
@@ -271,7 +271,8 @@ socket.on('connection', function(client) {
   client.on('autoAC', function(Data){//envia temperatura padrão do AC da sala de estar, com base no dado ACdeg armazenado na conexão autoAC
 	var mensagem = ':' + '12' + '1' + 'A' + '1' + ACdeg;//mensagem s/ lrc
     msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();
-    sPort.write(msglrc)
+	var mensagemlrc = mensagem+msglrc;//mensagem c/ lrc
+    sPort.write(mensagemlrc)
     console.log('temperatura de AC da Sala de estar '+ACdeg+' setada');
     //nada a retornar...
   })
@@ -287,7 +288,8 @@ socket.on('connection', function(client) {
 	var mensagem = ':' + '01' + '1' + 'D' + '0' + doorCloseTime;//mensagem s/ lrc
     console.log('Senha '+pass+' e tempo de destravamento '+doorCloseTime+' armazenados');
     msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();
-    sPort.write(msglrc)
+	var mensagemlrc = mensagem+msglrc;//mensagem c/ lrc
+    sPort.write(mensagemlrc)
     //nada a retornar...
   })
   
@@ -297,34 +299,31 @@ socket.on('connection', function(client) {
     ACdeg = Data+"00";
 	var mensagem = ':' + '12' + '1' + 'A' + '1' + ACdeg;//mensagem s/ lrc
     msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();
-    sPort.write(msglrc)
+	var mensagemlrc = mensagem+msglrc;//mensagem c/ lrc
+    sPort.write(mensagemlrc)
     console.log('temperatura de AC da Sala de estar '+ACdeg+' armazenada e setada');
     //nada a retornar...
   })
 
-  //JANELAS DA SALA DE ESTAR E DE JANTAR (NOTA: ORGANIZAR RECEBIMENTO DO WIND ALERT)
   client.on('Windows', function(Data){//armazena em variaveis os horários de controle das janelas, com base nos dados recebidos (Data) na conexão Windows
     console.log('Recebido da web:' + Data);
 	windhalf = Data[0] + ":00";
 	windop = Data[1] + ":00";
 	windclose = Data[2] + ":00";
-    //var aux = Data[0] //meio aberto
-    //windhalf = handleTime(aux);
-    //aux = Data[1] //abre td
-    //windop = handleTime(aux);
-    //aux = Data[2]; //fecha td
-    //windclose = handleTime(aux);
     console.log('Hora de abertura '+windop+', de intermedio '+windhalf+', e fechamento '+windclose+ ' armazenadas');
     //nada a retornar...
   })
 
-  //QUARTO E BANHEIRO
+  //QUARTO E BANHEIRO 251A0
   client.on('Heater', function(Data){//armazena em variavel o valor da banda morta com base nos dados recebidos (Data) na conexão Heater
     console.log('Recebido da web: ' + Data);
     var aux = Data;
     deadBand = handleSize(aux);
-    console.log('');
-	console.log('Deadband armazenado: ' + deadBand);
+	console.log('Enviando Deadband: ' + deadBand);
+	var mensagem = ':' + '25' + '1' + 'A' + '0' + deadBand;//mensagem s/ lrc
+    msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();
+	var mensagemlrc = mensagem+msglrc;//mensagem c/ lrc
+	sPort.write(mensagemlrc)
     //nada a retornar...
   })
   

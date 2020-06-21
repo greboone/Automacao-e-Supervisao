@@ -187,6 +187,7 @@ void schedule(){
   temperaturaSala();
   controlaAquecedor();
   controlaVento();
+  retorna();
 }
 
 /*

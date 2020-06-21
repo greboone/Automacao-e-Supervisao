@@ -472,6 +472,21 @@ void saladeestar(String msg){
 
 /*******************************************************************************************************/
 
+void controlaVento(){
+  
+  if(analogRead(VENTO) >= 511){
+    if(analogRead(ESTADOJANELAQUARTO) > 204){
+      digitalWrite(ENABLEQUARTO, HIGH);
+      digitalWrite(MOTORQUARTOANTIHORARIO, HIGH);
+    }
+    if(analogRead(ESTADOJANELASALA) > 204){
+      digitalWrite(ENABLESALA, HIGH);
+      digitalWrite(MOTORSALAANTIHORARIO, HIGH);
+    }
+  }
+
+}
+
 void controlaAquecedor(){
   float temp=0;
   temp = analogRead(LM35);

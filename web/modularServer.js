@@ -163,16 +163,21 @@ function handleSize(text){
 //recebe minutos e retorna em formato HHMM
 function convertMinToHHMM(min){
 	console.log("recebido " + min + " minuto(s)")
-	if((min/60.0) >= 1){//calcula hora
-		var hour = (min/60).toString();
+	if((min/60) >= 1){//calcula hora
+		var hour = (parseInt(min/60).toString()).toString();
+		if(hour.length < 2) hour = '0' + hour;
 		var minute = (min%60).toString();
+		if(minute.length < 2) minute = '0' + minute;
 		var retorno = hour + minute;
 		return retorno;
 	}else{
 		var hour = "00";
 		var minute = min.toString();
-		if(minute.length()<2) minute = '0' + min
 		var retorno = hour + minute;
+		if(minute.length < 2)
+		{
+			return retorno = hour + '0' + minute
+		}
 		return retorno;
 	}
 }
@@ -278,7 +283,7 @@ socket.on('connection', function(client) {
     console.log('Recebido da web: ' + Data);
     pass = Data[0];
     var dct = handleSize(Data[1]);
-    doorCloseTime = convertMinToHHMM(parseFloat(dct));//transforma em numero e converte no formato HHMM
+    doorCloseTime = convertMinToHHMM(parseInt(dct));//transforma em numero e converte no formato HHMM
 	var mensagem = ':' + '01' + '1' + 'D' + '0' + doorCloseTime;//mensagem s/ lrc
     console.log('Senha '+pass+' e tempo de destravamento '+doorCloseTime+' armazenados');
     msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();

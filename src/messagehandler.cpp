@@ -1,9 +1,10 @@
 #include "messagehandler.h"
 
-unsigned int BAUDRATE ;//= 9600;
+unsigned int BAUDRATE = 9600;
 
 void msgInit()
 {
+    Serial.end();
     Serial.begin(BAUDRATE);
     Serial.println("Serial Iniciado.");
     iniciaRtc();
@@ -198,6 +199,7 @@ void schedule(){
 
 void setBaud(String msg){
   int novo = 0;
+  novo = ((msg[3] - '0') * 1000000) + novo;
   novo = ((msg[4] - '0') * 100000) + novo;
   novo = ((msg[5] - '0') * 10000) + novo;
   novo = ((msg[6] - '0') * 1000) + novo;
@@ -206,13 +208,14 @@ void setBaud(String msg){
   novo = ((msg[9] - '0')) + novo;
   if(novo == 300 || novo == 1200 || novo == 2400 || novo == 4800 || novo == 9600 || 
      novo == 19200 || novo == 38400 || novo == 57600 || novo == 74880 || novo == 115200 ||
-     novo == 230400 || novo == 250000 || novo == 500000)
+     novo == 230400 || novo == 250000 || novo == 500000 || novo == 1000000 || novo == 2000000)
   {
     BAUDRATE = novo;
+    Serial.println("Alterando BaudRate");
+    msgInit();
   }else{
     Serial.print("Valor invalido!");
   }
 
-  Serial.println("Alterando BaudRate");
-  msgInit();
+  
 }

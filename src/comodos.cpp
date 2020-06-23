@@ -4,7 +4,9 @@ OneWire oneWire(DS18B20);             //CONFIGURA UMA INSTÂNCIA ONEWIRE PARA SE
 DallasTemperature sensors(&oneWire);  //BIBLIOTECA DallasTemperature UTILIZA A OneWire
 DeviceAddress sensor;
 
-/***************************************Variaveis para o Buzzer*****************************************/
+/*******************************************************************************************************/
+
+String retorno[28];// = "0000000000000000000000000000";
 
 int initBuzzer[3];
 int controlBuzzer[4] = {2,0,0,0};
@@ -12,14 +14,14 @@ int doorStatus;
 int doorPast;
 int doorTimer[4] = {0,0,0,0};
 int closeTimeout[2] = {0,0};
-
-float tempC, aux;
 int valueSala = 0, valueQuarto = 0;
 int salaTemp = 0;
 int controleJanelaquarto = 0, controleJanelasala = 0;
 int posicaoJanelaquarto = 0, posicaoJanelasala = 0;
 int bandaMorta = 2;
+
 float tempAnterior;
+float tempC, aux;
 
 
 /*******************************************************************************************************/
@@ -64,6 +66,8 @@ void iniciaRtc(){
   Serial.println("SENSOR OK!");
 }
 
+/*******************************************************************************************************/
+
 int checkDoor(int call){
   if(call == 0){
     DateTime now = rtc.now();
@@ -73,13 +77,13 @@ int checkDoor(int call){
       desligaBuzzer();
       controlBuzzer[0] = 2;
       if(doorStatus != doorPast){
-        Serial.println("Porta Fechada.");
+        //Serial.println("Porta Fechada.");
         doorPast = doorStatus;
       }
     }else{
       doorStatus = ABERTA;
       if(doorStatus != doorPast){
-        Serial.println("Porta Aberta.");
+        //Serial.println("Porta Aberta.");
         doorPast = doorStatus;
       }
       if(doorTimer[0] == 0){
@@ -100,10 +104,10 @@ int checkDoor(int call){
     
   }else{
       if(digitalRead(PORTAENTRADA) == HIGH){
-        Serial.println("Porta Fechada.");
+        //Serial.println("Porta Fechada.");
         return FECHADA;
       }else{
-        Serial.println("Porta Aberta.");
+        //Serial.println("Porta Aberta.");
         return ABERTA;
       }
     }
@@ -111,14 +115,42 @@ int checkDoor(int call){
   return(0);
 }
 
+int travaPorta(String msg, int type){
+  if(type == 0){
+    if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '1')){
+          //Serial.println("Abrindo trava.");
+          digitalWrite(TRAVAENTRADA, LOW);  // Abre trava
+          return ABERTA;
+    }
+    if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '0')){
+      if(checkDoor(1) == FECHADA){
+        //Serial.println("Fechando trava.");
+        digitalWrite(TRAVAENTRADA, HIGH); // Fecha trava
+        return FECHADA;
+      }else{
+        //Serial.println("Fechar a porta para trava-la");
+        return 2;
+      }
+    }
+  }else 
+  if(type == 1){
+    if(digitalRead(PORTAENTRADA) == ABERTA){
+      return 0;
+    }else{
+      return 1;
+    }
+  }
+  return 2;
+}
+
 void portaentrada(String msg){
-  Serial.println("Mensagem enviada para Porta de Entrada!");
+  //Serial.println("Mensagem enviada para Porta de Entrada!");
   switch (msg[2])
   {
-  case '1': // Porta de entrada: Entrada Sensor digital 24V (monitora estado)
+  case '1': // Porta de entrada: Entrada Sensor digital 24V (monitora estado) 
   {
     if(msg[3] == LEITURA){
-      Serial.println("Leitura do estado da porta!");
+      //Serial.println("Leitura do estado da porta!");
       checkDoor(1);
     }else if(msg[3] == ESCRITA){
       // escreve os valores de close timeout
@@ -138,24 +170,12 @@ void portaentrada(String msg){
   {
     if(msg[3] == LEITURA){
       if(digitalRead(TRAVAENTRADA) == HIGH){
-        Serial.print("Trava Fechada.");
+        //Serial.print("Trava Fechada.");
       }else{
-        Serial.print("Trava Aberta.");
+        //Serial.print("Trava Aberta.");
       }
     }else if(msg[3] == ESCRITA){
-      if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '1')){
-        Serial.println("Abrindo trava.");
-        digitalWrite(TRAVAENTRADA, LOW);  // Abre trava
-      }
-      if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '0')){
-        if(checkDoor(1) == FECHADA){
-          Serial.println("Fechando trava.");
-          digitalWrite(TRAVAENTRADA, HIGH); // Fecha trava
-        }else{
-          Serial.println("Fechar a porta para trava-la");
-        }
-        
-      }
+      travaPorta(msg,0);
     }
     break;
   }
@@ -163,27 +183,25 @@ void portaentrada(String msg){
   {
     if(msg[3] == LEITURA){
       if(digitalRead(BUZZER) == HIGH){
-        Serial.print("Alarme Ligado.");
+        //Serial.print("Alarme Ligado.");
       }
 
       if(digitalRead(BUZZER) == LOW){
-        Serial.print("Alarme Desligado.");
+        //Serial.print("Alarme Desligado.");
       }
 
     }else 
     if(msg[3] == ESCRITA){
       if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '1')){
-        Serial.println("Ligando buzzer");
+        //Serial.println("Ligando buzzer");
         ligaBuzzer();
         doorTimer[0] = 0;
-        controlBuzzer[0] = 2;
-        Serial.println(digitalRead(BUZZER));
+        //Serial.println(digitalRead(BUZZER));
       }
       if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '0')){
-        Serial.println("Desligando buzzer");
+        //Serial.println("Desligando buzzer");
         desligaBuzzer();
-        controlBuzzer[0] = 2;
-        Serial.println(digitalRead(BUZZER));
+        //Serial.println(digitalRead(BUZZER));
       }
     }
     break;
@@ -194,8 +212,7 @@ void portaentrada(String msg){
 }
 
 
-/***********************************Funcoes para o Buzzer e Porta***************************************/
-
+/*******************************************************************************************************/
 
 void ligaBuzzer(){
   DateTime now = rtc.now();
@@ -239,12 +256,6 @@ void desligaBuzzer(){
 }
 
 /*******************************************************************************************************/
-
-// Horario abre, Antihorario fecha
-// Motor Sala
-// Horario 43    Antihorario 44
-// Motor Quarto
-// Horario 46    Antihorario 47
 
 void desligaMotores(){
   if(analogRead(ESTADOJANELAQUARTO) >= 819 || analogRead(ESTADOJANELAQUARTO) <= 204){
@@ -291,8 +302,8 @@ void desligaMotores(){
 
 void controlaMotores(){
   if(controleJanelaquarto == 1){
-    Serial.print("Posicao usuario: "); Serial.print(posicaoJanelaquarto);
-    Serial.print(" Valor lido: ");Serial.println(analogRead(ESTADOJANELAQUARTO));
+    //Serial.print("Posicao usuario: "); Serial.print(posicaoJanelaquarto);
+    //Serial.print(" Valor lido: ");Serial.println(analogRead(ESTADOJANELAQUARTO));
     if(posicaoJanelaquarto > analogRead(ESTADOJANELAQUARTO)){
       digitalWrite(MOTORQUARTOANTIHORARIO, LOW);
       digitalWrite(MOTORQUARTOHORARIO, HIGH);
@@ -309,8 +320,8 @@ void controlaMotores(){
   }
   desligaMotores();
   if(controleJanelasala == 1){
-    Serial.print("Posicao usuario: "); Serial.print(posicaoJanelasala);
-    Serial.print(" Valor lido: ");Serial.println(analogRead(ESTADOJANELASALA));
+    //Serial.print("Posicao usuario: "); Serial.print(posicaoJanelasala);
+    //Serial.print(" Valor lido: ");Serial.println(analogRead(ESTADOJANELASALA));
     if(posicaoJanelasala > analogRead(ESTADOJANELASALA)){
       digitalWrite(MOTORSALAANTIHORARIO, LOW);
       digitalWrite(MOTORSALAHORARIO, HIGH);
@@ -329,16 +340,23 @@ void controlaMotores(){
   
 }
 
-
 void temperaturaSala(){
   sensors.requestTemperatures();
   aux = sensors.getTempC(sensor);
-  if (aux != -127.00 && aux != 85 && aux != 0){
+  if (aux != -127.00 && aux != 85){// && aux != 0){
     tempC = aux;
   }
   sensors.requestTemperatures();
-  //Serial.print("Aux: ");
-  //Serial.println(aux);
+
+  if (!sensors.getAddress(sensor, 0))
+  {
+    //Serial.println("Sensores nao encontrados !");
+  }
+
+  // Serial.print("Aux: ");
+  // Serial.print(aux);
+  // Serial.print(" Temp: ");
+  // Serial.println(tempC);
 }
 
 int temptoBytes(int temp){
@@ -346,19 +364,19 @@ int temptoBytes(int temp){
 }
 
 void saladeestar(String msg){
-  Serial.println("Mensagem enviada para Sala de Estar!");
+  //Serial.println("Mensagem enviada para Sala de Estar!");
   switch (msg[2])
   {
   case '1': // Sensor Temperatura Sala de Estar: Entrada Digital 5V
             // a. Controla AC (autoTemp)
             // b. Temperatura padrão: 25ºC
   {
-    Serial.println("Mensagem para o sensor de temperatura DS18B20.");
+    //Serial.println("Mensagem para o sensor de temperatura DS18B20.");
     
     if(msg[3] == LEITURA){
       temperaturaSala();
-      Serial.print("Temperatura: ");
-      Serial.println(tempC);
+      //Serial.print("Temperatura: ");
+      //Serial.println(tempC);
     }else if(msg[3] == ESCRITA){
       
     }
@@ -369,18 +387,18 @@ void saladeestar(String msg){
             // saída analógica 5V (temp = Tensão*10, temp > 0 && temp < 50)
   {
     if(msg[3] == LEITURA){
-      Serial.print("Valor de temperatura configurado: ");
-      Serial.println(salaTemp);
+      //Serial.print("Valor de temperatura configurado: ");
+      //Serial.println(salaTemp);
     }else if(msg[3] == ESCRITA){
       int T,t;
       // Converte os valores recebidos em string para inteiros
       T = (msg[8] - '0') * 10;
       t = (msg[9] - '0');
       salaTemp = T+t;
-      Serial.print("Valor recebido: ");
-      Serial.println(salaTemp);
+      //Serial.print("Valor recebido: ");
+      //Serial.println(salaTemp);
       if(salaTemp > 50 || salaTemp < 17){
-        Serial.println("Valor de temperatura invalido!");
+        //Serial.println("Valor de temperatura invalido!");
         break;
       }
       analogWrite(ACSALA,temptoBytes(salaTemp));
@@ -390,9 +408,8 @@ void saladeestar(String msg){
   case '3': // Luz de estar: saída analógica 5V (0 = off, 5V = brilho max)
   {
     if(msg[3] == LEITURA){
-      
-      Serial.print("Luz da sala em ");
-      Serial.println(valueSala);
+      //Serial.print("Luz da sala em ");
+      //Serial.println(valueSala);
     }else if(msg[3] == ESCRITA){
       int c,d,u;
       // Converte os valores recebidos em string para inteiros
@@ -410,8 +427,8 @@ void saladeestar(String msg){
             // Motor Janela Sala de estar
   {
     if(msg[3] == LEITURA){
-      Serial.print("Posição da janela: ");
-      Serial.println(analogRead(ESTADOJANELASALA));
+      //Serial.print("Posição da janela: ");
+      //Serial.println(analogRead(ESTADOJANELASALA));
     }else if(msg[3] == ESCRITA){
       int m,c,d,u;
       // Converte os valores recebidos em string para inteiros
@@ -420,32 +437,10 @@ void saladeestar(String msg){
       d = (msg[8] - '0') * 10;
       u = (msg[9] - '0');
       posicaoJanelasala = m+c+d+u;
-      Serial.print("Valor recebido: ");
-      Serial.println(posicaoJanelasala);
+      //Serial.print("Valor recebido: ");
+      //Serial.println(posicaoJanelasala);
       controleJanelasala = 1;
       digitalWrite(ENABLESALA, HIGH);
-    }
-    break;
-  }
-  case '5': // Duas portas digitais de saída 24V controlam (cima/baixo)
-  {
-    if(msg[3] == LEITURA){
-
-    }else if(msg[3] == ESCRITA){
-        
-    }
-    break;
-  }
-  case '6': // sensor entrada analógico 5v de posição (1v full fechada - 4v full aberta)
-            // 3 Horários padronizados
-            // Time 1: meio aberta (padrão 8:00h)
-            // Time 2: full aberta (padrão 12:00h)
-            // Time 3: full fechada (padrão 18:00h)
-  {
-    if(msg[3] == LEITURA){
-
-    }else if(msg[3] == ESCRITA){
-        
     }
     break;
   }
@@ -454,9 +449,9 @@ void saladeestar(String msg){
             // Se speed >= 50, fechar janelas + Wind Alert 
   {
     if(msg[3] == LEITURA){
-
+      //Serial.println(controlaVento());
     }else if(msg[3] == ESCRITA){
-        
+      
     }
     break;
   }
@@ -466,15 +461,18 @@ void saladeestar(String msg){
   }
 }
 
+int controlaVento(){
+  int wind = analogRead(VENTO);
+  int tensao = 0;
 
+  tensao = (5 * wind)/1023;
+  wind = (tensao - 0.36206896551)/0.0275862069;
 
-/****************************************Funcoes para o Buzzer******************************************/
+  if(wind < 0){
+    wind = 0;
+  }
 
-/*******************************************************************************************************/
-
-void controlaVento(){
-  
-  if(analogRead(VENTO) >= 511){
+  if(wind >= 50){
     if(analogRead(ESTADOJANELAQUARTO) > 204){
       digitalWrite(ENABLEQUARTO, HIGH);
       digitalWrite(MOTORQUARTOANTIHORARIO, HIGH);
@@ -484,10 +482,10 @@ void controlaVento(){
       digitalWrite(MOTORSALAANTIHORARIO, HIGH);
     }
   }
-
+  return wind;
 }
 
-void controlaAquecedor(){
+int controlaAquecedor(){
   float temp=0;
   temp = analogRead(LM35);
   temp = (((temp) * 5 / (1023)) / 0.01);
@@ -505,17 +503,18 @@ void controlaAquecedor(){
     digitalWrite(AQUECEDOR, HIGH); // Desliga Aquecedor
   }
   }
+  return temp;
 }
 
 void quartoebanheiro(String msg){
-  Serial.println("Mensagem enviada para Quarto/Banheiro!");
+  //Serial.println("Mensagem enviada para Quarto/Banheiro!");
   switch (msg[2])
   {
   case '1': // Janela do Quarto: Duas portas digitais de saída 24V controlam (cima/baixo)
   {
     if(msg[3] == LEITURA){
-      Serial.print("Posição da janela: ");
-      Serial.println(analogRead(ESTADOJANELAQUARTO));
+      //Serial.print("Posição da janela: ");
+      //Serial.println(analogRead(ESTADOJANELAQUARTO));
     }else if(msg[3] == ESCRITA){
       int m,c,d,u;
       // Converte os valores recebidos em string para inteiros
@@ -524,40 +523,19 @@ void quartoebanheiro(String msg){
       d = (msg[8] - '0') * 10;
       u = (msg[9] - '0');
       posicaoJanelaquarto = m+c+d+u;
-      Serial.print("Valor recebido: ");
-      Serial.println(posicaoJanelaquarto);
+      //Serial.print("Valor recebido: ");
+      //Serial.println(posicaoJanelaquarto);
       controleJanelaquarto = 1;
       digitalWrite(ENABLEQUARTO, HIGH);
     }
     break;
   }
-  case '2': // Janela do Quarto: Duas portas digitais de saída 24V controlam (cima/baixo)
-  {
-    if(msg[3] == LEITURA){
 
-    }else if(msg[3] == ESCRITA){
-        
-    }
-    break;
-  }
-  case '3': // sensor de entrada analógico 5v de posição (1v full fechada - 4v full aberta)
-            // 3 Horários padronizados
-            // Time 1: meio aberta (padrão 8:00h)
-            // Time 2: full aberta (padrão 12:00h)
-            // Time 3: full fechada (padrão 18:00h
-  {
-    if(msg[3] == LEITURA){
-      
-    }else if(msg[3] == ESCRITA){
-      
-    }
-    break;
-  }
   case '4': // Luz quarto: saída analógica 5V (0 = off, 5V = brilho max)
   {
     if(msg[3] == LEITURA){
-      Serial.print("Luz da sala em ");
-      Serial.println(valueQuarto);
+      //Serial.print("Luz da sala em ");
+      //Serial.println(valueQuarto);
     }else if(msg[3] == ESCRITA){
       int c,d,u;
       // Converte os valores recebidos em string para inteiros
@@ -574,11 +552,10 @@ void quartoebanheiro(String msg){
   case '5': // Sensor de Temperatura: Entrada LM35 Analógico 4-20V (Se < 17ºC, liga aquecedor)
   {
     if(msg[3] == LEITURA){
-      Serial.print("Temperatura do LM35: ");
-      Serial.println((float(analogRead(LM35)) * 5 / (1023)) / 0.01);
+      //Serial.print("Temperatura do LM35: ");
+      //Serial.println((float(analogRead(LM35)) * 5 / (1023)) / 0.01);
     }else if(msg[3] == ESCRITA){
       int d,u;
-
       // Converte os valores recebidos em string para inteiros
       d = (msg[8] - '0') * 10;
       u = (msg[9] - '0');
@@ -586,18 +563,101 @@ void quartoebanheiro(String msg){
     }
     break;
   }
-  case '6': // Aquecedor: Saída Digital controlado pelo sensor (Dead Band Temp)
-  {
-    if(msg[3] == LEITURA){
 
-    }else if(msg[3] == ESCRITA){
-        
-    }
-    break;
-  }
 
   default:
     break;
   }
 }
 
+void retorna(){
+  int m, c, d, u, completo;
+  
+
+  /*  ENDERECO 01  */
+  retorno[0] = String(0);
+  retorno[1] = String(0);
+  retorno[2] = String(0);
+  if(travaPorta(String("oi"),1) == 0){
+    retorno[3] = String(0);
+  }else
+  if(travaPorta(String("oi"),1) == 1){
+    retorno[3] = String(1);
+  }
+
+  /*  ENDERECO 11  */
+  d = tempC / 10;
+  u = tempC - (d*10);
+
+  retorno[4] = String(0);
+  retorno[5] = String(0);
+  retorno[6] = String(d);
+  retorno[7] = String(u);
+
+  /*  ENDERECO 14  */
+  completo = analogRead(ESTADOJANELASALA);
+
+  m = completo /1000; 
+  c = (completo - (m*1000)) / 100;
+  d = (completo - (m*1000) - (c*100))/10; 
+  u = (completo - (m*1000) - (c*100) - (d*10));
+
+  retorno[8] = String(m);
+  retorno[9] = String(c);
+  retorno[10] = String(d);
+  retorno[11] = String(u);
+
+  /*  ENDERECO 17  */
+  completo = controlaVento();
+
+  m = completo /1000; 
+  c = (completo - (m*1000)) / 100;
+  d = (completo - (m*1000) - (c*100))/10; 
+  u = (completo - (m*1000) - (c*100) - (d*10));
+
+  retorno[12] = String(m);
+  retorno[13] = String(c);
+  retorno[14] = String(d);
+  retorno[15] = String(u);
+
+  /*  ENDERECO 21  */
+  completo = analogRead(ESTADOJANELAQUARTO);
+
+  m = completo /1000; 
+  c = (completo - (m*1000)) / 100;
+  d = (completo - (m*1000) - (c*100))/10; 
+  u = (completo - (m*1000) - (c*100) - (d*10));
+
+  retorno[16] = String(m);
+  retorno[17] = String(c);
+  retorno[18] = String(d);
+  retorno[19] = String(u);
+
+  /*  ENDERECO 25  */
+  completo = controlaAquecedor();
+
+  m = completo /1000; 
+  c = (completo - (m*1000)) / 100;
+  d = (completo - (m*1000) - (c*100))/10; 
+  u = (completo - (m*1000) - (c*100) - (d*10));
+
+  retorno[20] = String(m);
+  retorno[21] = String(c);
+  retorno[22] = String(d);
+  retorno[23] = String(u);
+
+  /*  ENDERECO 26  */
+  retorno[24] = String(0);
+  retorno[25] = String(0);
+  retorno[26] = String(0);
+  if(digitalRead(AQUECEDOR) == 1){
+    retorno[27] = '0';
+  }else{
+    retorno[27] = '1';
+  }
+
+  for(int i=0;i < 27; i++){
+    Serial.print(retorno[i]);
+  }
+  Serial.println(retorno[27]);
+}

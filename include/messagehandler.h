@@ -6,14 +6,6 @@
 
 void msgHandler();
 void msgInit();
-
+void setBaud(String msg);
 void schedule();
 uint8_t calculalrc(uint8_t *msg, uint8_t t);
-/*
-void static read_coil       (String msg);
-void static read_input      (String msg);
-void static write_coil      (String msg);
-void static read_analog     (String msg);
-void static write_analog    (String msg);
-
-*/

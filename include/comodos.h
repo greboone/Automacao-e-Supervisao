@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <stdint.h>
+#include <string.h>
 #include "RTClib.h"
 #include "OneWire.h"
 #include "DallasTemperature.h"
@@ -50,5 +51,6 @@ void temperaturaSala();
 void desligaMotores();
 void controlaMotores();
 
-void controlaAquecedor();
-void controlaVento();
+int controlaAquecedor();
+int controlaVento();
+void retorna();

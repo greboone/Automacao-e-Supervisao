@@ -139,6 +139,38 @@ async function later()
 	}
 */
 
+function handlebaud(text){//300 a 2000000
+	var tam = (text.toString()).length;
+	switch (tam){
+		case 0:
+			return ('erro');
+			
+		case 1:
+			return ('000000' + text);
+      
+	    case 2:
+			return ('00000' + text);
+
+		case 3:
+			return ('0000' + text);
+
+		case 4:
+			return ('000' + text);
+			
+		case 5:
+			return ('00' + text);
+			
+		case 6:
+			return ('0' + text);
+			
+		case 7:
+			return (text);
+
+		default:
+			return ('0000000');
+	}
+}
+
 /*função que define a quantidade de caracteres recebidos e transforma em 4*/
 function handleSize(text){
   var tam = (text.toString()).length;
@@ -330,14 +362,36 @@ socket.on('connection', function(client) {
     //nada a retornar...
   })
   
+  client.on('baud', function(Data){
+	  console.log('Recebido baudrate: ' + Data);
+	  var aux = Data;
+	  tempbaud = handlebaud(aux);
+	  console.log('Enviando baudrate: ' + tempbaud);
+	  var mensagem = ':' + '3' + tempbaud;//mensagem s/ lrc
+	  msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();
+	  var mensagemlrc = mensagem+msglrc;//mensagem c/ lrc
+	  sPort.write(mensagemlrc);
+	  perareset(parseInt(tempbaud));
+  })
+  
   //comunicação de monitoramento lá embaixo...
 })
+
+async function perareset()
+{
+	await sleep(5000);
+	BAUD = tempbaud;
+}
+
+
+var BAUD = 9600;
+var tempbaud = BAUD;
 
 /***** Porta Serial *****/
 const SerialPort = require('serialport');
 const Readline = SerialPort.parsers.Readline;
 const sPort = new SerialPort('COM4', {
-  baudRate: 9600
+  baudRate: BAUD
 })
 const parser = new Readline();
 sPort.pipe(parser);
@@ -345,6 +399,7 @@ sPort.pipe(parser);
 /* DEFINIÇÔES DE VARIAVEIS GLOBAIS */
 
 //Variáveis da mensagem Firmware/backend
+
 var msglrc = '00'; //contém o LRC
 var slaveAdr = '00'; //endereço do escravo: Comodo+Objeto
 var slaveRW = '0'; //0 ou 1, leitura ou escrita
@@ -409,9 +464,15 @@ sPort.open(function (err) {
   console.log('Porta Serial Aberta')
 })
 
+
+/** SE MENSAGEM >=28 E ??
+ * OU SÓ SE MENSAGEM == 28??
+ * SEI LA
+ */
 //recebendo do controlador
 //tratamento de mensagens recebidas do arduino (respostas)
 parser.on('data', (data) => {
+  console.log('Recebido do arduino: ' + data);
   if(data.length >= monitsize){	//>=28
     /////////////     MENSAGENS DE MONITORAMENTO     /////////////
     //Formato segue conforme a descrição no arquivo disponível no docs, de item a item

@@ -6,7 +6,7 @@
  </FRAME>
  <MODULE name="VSMDEBUG">
   <PWI>
-   <POPUP w="400" x="5" flags="00000002" y="106" h="100" pid="0" iid="-1">
+   <POPUP w="400" x="5" flags="00000002" y="106" h="257" pid="0" iid="-1">
     <PROPERTIES>
      <ITEM name="Message Column Width">150</ITEM>
      <ITEM name="ShowGrid">No</ITEM>
@@ -65,7 +65,7 @@
      <ITEM name="TopLineAddress">00000000</ITEM>
     </PROPERTIES>
    </POPUP>
-   <POPUP w="16" x="158" flags="80000000" y="245" h="32" pid="14" iid="3">
+   <POPUP w="16" x="158" flags="00000000" y="245" h="32" pid="14" iid="3">
     <PROPERTIES>
      <ITEM name="DataType">2</ITEM>
      <ITEM name="DispChars">Yes</ITEM>
@@ -123,7 +123,7 @@
      <ITEM name="nItems">0</ITEM>
     </PROPERTIES>
    </POPUP>
-   <POPUP w="20" x="258" flags="00000001" y="345" h="3" pid="1" iid="9">
+   <POPUP w="20" x="815" flags="00000001" y="144" h="3" pid="1" iid="9">
     <PROPERTIES/>
    </POPUP>
    <POPUP w="8" x="278" flags="00000008" y="365" h="8" pid="2" iid="9">

@@ -103,6 +103,12 @@
 			  socket.emit('Heater', [x] );
 			  console.log('HTML: Enviando temperatura dead band ' +x);
 			}
+
+            function baud() {//envia temperatura do aquecedor na comunicação 'baud'. É chamada no clique do botão da configuração do Quarto e Banheiro
+			  var x = document.getElementById("baudRate").value;
+			  socket.emit('baud', [x] );
+			  console.log('HTML: Enviando valor do Baud Rate ' +x);
+			}
 			
 			//COMUNICAÇÂO DE MONITORAMENTO
 			//nota: comunicação é case sensitive, por isso, n tem problemas usar monit e Monit...
@@ -165,6 +171,7 @@
                     x.style.display = "none";
                 }            
 			})
+
 			socket.on('OpDoorLogError', function(erro){
 				//aki ativar o mostrar da mensagem de erro do passwordDoor
 				var x = document.getElementById("passwordDoor");
@@ -300,8 +307,16 @@
                         </div>
                     </div>
                 </div>
-            </div>
+                
+                <br>
 
+                <div class="input-group">
+                    <input id="baudRate" min="300" max="2000000" class="col-xs-2" class="form-control" placeholder="Digite o valor do Baud Rate" aria-label="Recipient's username" aria-describedby="basic-addon2">
+                    <div class="input-group-append">
+                      <button class="btn btn-success" type="button" onclick="baud()">Salvar</button>
+                    </div>
+                </div>
+            </div>
             <div id="monit" style="display:none">
             
                 <br>

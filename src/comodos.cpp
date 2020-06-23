@@ -13,7 +13,7 @@ int controlBuzzer[4] = {2,0,0,0};
 int doorStatus;
 int doorPast;
 int doorTimer[4] = {0,0,0,0};
-int closeTimeout[2] = {0,0};
+int closeTimeout[3] = {0,1,0};
 int valueSala = 0, valueQuarto = 0;
 int salaTemp = 0;
 int controleJanelaquarto = 0, controleJanelasala = 0;
@@ -70,35 +70,61 @@ void iniciaRtc(){
 
 int checkDoor(int call){
   if(call == 0){
+    Serial.println("checkDoor");
     DateTime now = rtc.now();
     if(digitalRead(PORTAENTRADA) == HIGH){
       doorStatus = FECHADA;
       doorTimer[0] = 0;
       desligaBuzzer();
       controlBuzzer[0] = 2;
+      Serial.print("controlBuzzer[0]:"); Serial.println(controlBuzzer[0]);
+      Serial.print("controlBuzzer[1]:"); Serial.println(controlBuzzer[1]);
+      Serial.print("controlBuzzer[2]:"); Serial.println(controlBuzzer[2]);
+      Serial.print("controlBuzzer[3]:"); Serial.println(controlBuzzer[3]);
+      Serial.print("closeTimeout[0]:"); Serial.println(closeTimeout[0]);
+      Serial.print("closeTimeout[1]:"); Serial.println(closeTimeout[1]);
+      Serial.print("closeTimeout[2]:"); Serial.println(closeTimeout[2]);
       if(doorStatus != doorPast){
-        //Serial.println("Porta Fechada.");
+        Serial.println("Porta Fechada.");
         doorPast = doorStatus;
       }
     }else{
       doorStatus = ABERTA;
       if(doorStatus != doorPast){
-        //Serial.println("Porta Aberta.");
+        Serial.println("Porta Aberta.");
         doorPast = doorStatus;
       }
+
       if(doorTimer[0] == 0){
         doorTimer[0] = 1;
         doorTimer[1] = now.hour();
         doorTimer[2] = now.minute();
         doorTimer[3] = now.second();
+        Serial.print("doorTimer[0]:"); Serial.println(doorTimer[0]);
+        Serial.print("doorTimer[1]:"); Serial.println(doorTimer[1]);
+        Serial.print("doorTimer[2]:"); Serial.println(doorTimer[2]);
+        Serial.print("doorTimer[3]:"); Serial.println(doorTimer[3]);
       }else
       if(doorTimer[0] == 1){
-        if((doorTimer[1] <= (now.hour()   + closeTimeout[0]))   && 
-           (doorTimer[2] <= (now.minute() + closeTimeout[1]))   && 
-           (doorTimer[3] <= (now.second() + closeTimeout[2]))
-          ){
-          ligaBuzzer();
+        Serial.print("doorTimer[0]:"); Serial.println(doorTimer[0]);
+        //int hora = (doorTimer[1] + closeTimeout[0]);
+        //int minuto = (doorTimer[2] + closeTimeout[1]);
+        Serial.print("HORA: "); Serial.println(now.hour());
+        Serial.print("MINUTE: "); Serial.println(now.minute());
+        Serial.print("SECONDS: "); Serial.println(now.second());
+        Serial.print("Door time[1] + close timeout[0]: "); Serial.println(doorTimer[1] + closeTimeout[0]);
+        Serial.print("Door time[2] + close timeout[1]: "); Serial.println(doorTimer[2] + closeTimeout[1]);
+        Serial.print("Door time[3] + close timeout[2]: "); Serial.println(doorTimer[3] + closeTimeout[2]);
+
+        if(((doorTimer[1] + closeTimeout[0]) <= (int)now.hour())){
+          if( ((doorTimer[2] + closeTimeout[1]) <= (int)now.minute()) ){
+            if( ((doorTimer[3] + closeTimeout[2]) <= (int)now.second()) ){
+              Serial.println("LIGOU O BUZZER");
+              ligaBuzzer();
+            }
           }
+        }
+
       }
     }
     
@@ -218,6 +244,7 @@ void ligaBuzzer(){
   DateTime now = rtc.now();
   digitalWrite(BUZZER, HIGH);
 
+  doorTimer[0] = 0;
   controlBuzzer[0] = 0;
   controlBuzzer[1] = now.hour();
   controlBuzzer[2] = now.minute();
@@ -226,19 +253,26 @@ void ligaBuzzer(){
 
 void checkBuzzer(){
   DateTime now = rtc.now();
+  Serial.print("controlBuzzer[0]: "); Serial.println(controlBuzzer[0]);
   if(controlBuzzer[0] == 0){
-    if((controlBuzzer[1] <= (now.hour()    )) && 
-       (controlBuzzer[2] <= (now.minute()+2)) && 
-       (controlBuzzer[3] <= (now.second()  ))
-      )
-      desligaBuzzer();
+    if((controlBuzzer[1] <= (now.hour()))){
+      if(((controlBuzzer[2]+1) <= now.minute())){
+        if((controlBuzzer[3] <= (now.second()))){
+          desligaBuzzer();
+        }
+      }
+    }
+      
   }else 
   if(controlBuzzer[0] == 1){
-    if((controlBuzzer[1] <= (now.hour()    )) && 
-       (controlBuzzer[2] <= (now.minute()+5)) && 
-       (controlBuzzer[3] <= (now.second()  ))
-      )
-      ligaBuzzer();
+    if((controlBuzzer[1] <= (now.hour()))){
+      if(((controlBuzzer[2]+2) <= now.minute())){
+        if((controlBuzzer[3] <= (now.second()))){
+          ligaBuzzer();
+        }
+      }
+    }
+
   }else{
     //Serial.print();
     //Serial.println(digitalRead(BUZZER));

@@ -1,5 +1,5 @@
 .btn-lg {
-    width: 50%;
+    width: 100%;
 }
 
 @import url('https://fonts.googleapis.com/css?family=Montserrat:400,800|Poppins&display=swap');
@@ -46,4 +46,10 @@ h4 {
 
 .input-group {
   margin-left: 20px;
+}
+
+#image {
+  height: 100%;
+  width: 100%;
+  filter: saturate(100%);
 }

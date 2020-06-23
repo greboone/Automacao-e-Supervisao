@@ -11,33 +11,39 @@
         <script>
             
             var socket = io();
-            var divConfig = 0;
+            var divConfig = 1;
             var divMonit = 0;
 
-            function config() {
-                var x = document.getElementById("config");
+            $(document).ready(function(){
+                $("#btnPage").click(function(){ 
+                    if(divConfig == 1)
+                    {
+                        $(this).val("Página de Configuração");
+                    }
+                    else {
+                        $(this).val("Página de Monitoramento e Ações");
+                    }
+                });
+            });
 
-                if (x.style.display === "none" && divMonit == 0) {
+            function page() {
+                var config = document.getElementById("config");
+                var monit = document.getElementById("monit");
+
+                if (config.style.display === "none") {
+                    config.style.display = "block";
                     divConfig = 1;
-                    x.style.display = "block";
                 } else {
+                    config.style.display = "none";
                     divConfig = 0;
-                    x.style.display = "none";
+                }
+                if (monit.style.display === "none") {
+                    monit.style.display = "block";
+                } else {
+                    monit.style.display = "none";
                 }
             }
             
-            function monit() {
-                var x = document.getElementById("monit");
-                
-                if (x.style.display === "none" && divConfig == 0) {
-                    divMonit = 1;
-                    x.style.display = "block";
-                } else {
-                    divMonit = 0;
-                    x.style.display = "none";
-                }
-            }
-			
 			//COMUNICAÇÂO DE AÇÂO
 			/*
 			(recebe no servidor:)
@@ -197,12 +203,27 @@
     <body>
         <div class="container-fluid">
             <div class="row" id="button">
-                <button type="button" class="btn btn-dark btn-lg" onclick="config()">Configuração</button>
-                <button type="button" class="btn btn-secondary btn-lg" onclick="monit()">Monitoramento</button>
+                <input class="btn btn-info btn-lg" type="Button" id="btnPage" value="Página de Configuração" onclick="page()"/>
            </div>
+           <br>
+            <nav class="navbar navbar-expand-sm bg-info fixed-bottom">
+                <div class="collapse navbar-collapse">
+                    <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                        <li class="nav-item active">
+                            <a href="https://github.com/polesearthur" class="text-light">Arthur Polese</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="https://github.com/greboone" class="text-light">Gustavo Rauber Ebone</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="https://github.com/samu158820" class="text-light">Samuel Antunes Vieira</a> 
+                        </li>
+                    </ul>
+                    <a href="https://github.com/greboone/Automacao-e-Supervisao" class="text-light">Descrição do Projeto no github</a>
+                </div>
+                </nav>
 
-            <div id="config" style="display:none">
-                <br>
+            <div id="config" style="display:block">
                 <h2><span class="badge badge-info">TELA DE CONFIGURAÇÂO DOS PARÂMETROS</span></h2>
                 <br>
                 <div class="configCards">
@@ -318,8 +339,6 @@
                 </div>
             </div>
             <div id="monit" style="display:none">
-            
-                <br>
                     <h2><span class="badge badge-info">TELA DE MONITORAMENTO E AÇÕES</span></h2>
             
                 <div class="monitCards">
@@ -603,26 +622,5 @@
                         </div>
                     </div> 
                 </div>          
-
-                <br>
-                <br>
-
-        <nav class="navbar navbar-expand-sm bg-info fixed-bottom">
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-                    <li class="nav-item active">
-                        <a href="https://github.com/polesearthur" class="text-light">Arthur Polese</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="https://github.com/greboone" class="text-light">Gustavo Rauber Ebone</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="https://github.com/samu158820" class="text-light">Samuel Antunes Vieira</a> 
-                    </li>
-                </ul>
-                <a href="https://github.com/greboone/Automacao-e-Supervisao" class="text-light">Descrição do Projeto no github</a>
-            </div>
-          </nav>
-
     </body>
 </html>

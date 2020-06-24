@@ -225,7 +225,7 @@ function handleTime(text){
 //faz isso daki a 1 segundo
 async function later(profirmware)
 {
-	await sleep(1000);
+	await sleep(300);
 	sPort.write(profirmware);
 }
 
@@ -265,6 +265,7 @@ socket.on('connection', function(client) {
 		var mensagem = ':' + slaveAdr + slaveRW + slaveAD + slaveIO + slaveData;//mensagem s/ lrc
 		msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();//calcula lrc e armazena aqui
 		var mensagemlrc = mensagem+msglrc;//mensagem c/ lrc
+		console.log("msg de acao: " +mensagemlrc);
 		//sPort.write()
 		later(mensagemlrc);
 		//nada a retornar...
@@ -306,8 +307,9 @@ socket.on('connection', function(client) {
 	var mensagem = ':' + '12' + '1' + 'A' + '1' + ACdeg;//mensagem s/ lrc
     msglrc = ((calculateLRC(((Buffer.from(mensagem)).toString()).slice(1))).toString(16)).toUpperCase();
 	var mensagemlrc = mensagem+msglrc;//mensagem c/ lrc
-    sPort.write(mensagemlrc)
+    //sPort.write(mensagemlrc)
     console.log('temperatura de AC da Sala de estar '+ACdeg+' setada');
+	later(mensagemlrc)
     //nada a retornar...
   })
 
@@ -434,22 +436,18 @@ var windalert = "Vento muito forte, janelas sendo fechadas para sua segurança."
 //Hora atual
 var Hora = 0;
 
-var end01; //dispositivo de endereço 01, descrito no docs
-var end02; //dispositivo de endereço 02, descrito no docs
-var end03; //dispositivo de endereço 03, descrito no docs
-var end11; //dispositivo de endereço 11, descrito no docs
-var end12; //dispositivo de endereço 12, descrito no docs
-var end13; //dispositivo de endereço 13, descrito no docs
-var end14; //dispositivo de endereço 14, descrito no docs
-var end15; //dispositivo de endereço 15, descrito no docs
-var end16; //dispositivo de endereço 16, descrito no docs
-var end17; //dispositivo de endereço 17, descrito no docs
-var end21; //dispositivo de endereço 21, descrito no docs
-var end22; //dispositivo de endereço 22, descrito no docs
-var end23; //dispositivo de endereço 23, descrito no docs
-var end24; //dispositivo de endereço 24, descrito no docs
-var end25; //dispositivo de endereço 25, descrito no docs
-var end26; //dispositivo de endereço 26, descrito no docs
+var end01; //dispositivo de endereço 01, Porta de entrada: entrada sensor digital 24v
+var end02; //dispositivo de endereço 02, Solenoide da Porta: Saída Digital 24V
+var end03; //dispositivo de endereço 03, Alarme sonoro: Saída digital 5v
+var end11; //dispositivo de endereço 11, Sensor Temperatura Sala de Estar: Entrada Digital 5V
+var end12; //dispositivo de endereço 12, AC sala de estar remoto: (manual mode): saída analógica 5V
+var end13; //dispositivo de endereço 13, Luz de estar: saída analógica 5V
+var end14; //dispositivo de endereço 14, Janela de estar e jantar: sensor entrada analógico 5v de posição, Duas portas digitais de saída 24V
+var end17; //dispositivo de endereço 17, Wind Speed: sensor entrada analógico 5V
+var end21; //dispositivo de endereço 21, Janela do Quarto: Duas portas digitais de saída 24V, sensor de entrada analógico 5v de posição
+var end24; //dispositivo de endereço 24, Luz quarto: saída analógica 5V
+var end25; //dispositivo de endereço 25, Sensor de Temperatura: Entrada LM35 Analógico 4-20V
+var end26; //dispositivo de endereço 26, Aquecedor: Saída Digital controlado pelo sensor de temperatura
 var estado; //auxiliar
 
 //dado anterior das janelas

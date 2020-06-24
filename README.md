@@ -127,7 +127,7 @@ deve ser configurado na página de parâmetros de configuração da interface WE
 * **Página de Configuração**
 
 <div align="center">
-   <img src="./Pictures/figura7.PNG" alt="figura7" width="50%" height="20%"/></center>
+   <img src="./Pictures/figura7.PNG" alt="figura7" width="80%" height="50%"/></center>
 </div>
 
 A página de configuração (Figura 7) define as parâmetros iniciais a serem utilizadas na comunicação,
@@ -141,7 +141,7 @@ A transição entre páginas é possível ao se clicar no título da página atu
 * **Página de Ações e Monitoramento**
 
 <div align="center">
-   <img src="./Pictures/figura8.PNG" alt="figura8" width="50%" height="20%"/></center>
+   <img src="./Pictures/figura8.PNG" alt="figura8" width="80%" height="50%"/></center>
 </div>
 
 Na página principal (Figura 8), onde se pode, simultaneamente, monitorar sensores e a agir sobre atuadores,

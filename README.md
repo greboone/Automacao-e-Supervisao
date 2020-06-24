@@ -45,7 +45,7 @@ como a disposição dos sensores e atuadores utilizados.
    <img src="./Pictures/figura2.PNG" alt="figura2" width="50%" height="20%"/></center>
 </div>
 
-* **Descrição do controle
+* **Descrição do controle**
 
 * **Entrada principal:**
 
@@ -108,7 +108,7 @@ analógico externo, tal sensor tem a seguinte característica, 0,5V é equivalen
 devem ser fechadas e um aviso (Wind Alert) deve ser emitido para a página WEB.
 
 
-* **Quarto e Banheiro**:
+* **Quarto e Banheiro:**
 
 Possui luminosidade controlada remotamente (lamp), para isso, uma saída analógica
 deve ser utilizada, sendo 0V lâmpada desligada e 5V lâmpada em seu brilho máximo.
@@ -121,3 +121,32 @@ deve ser configurado na página de parâmetros de configuração da interface WE
 <div align="center">
    <img src="./Pictures/figura6.PNG" alt="figura6" width="50%" height="20%"/></center>
 </div>
+
+*    **Páginas web**
+
+* **Página de Configuração**
+
+<div align="center">
+   <img src="./Pictures/figura7.PNG" alt="figura7" width="50%" height="20%"/></center>
+</div>
+
+A página de configuração (Figura 7) define as parâmetros iniciais a serem utilizadas na comunicação,
+como senha da porta (incluindo redefinição de senha) e seu tempo de fechamento,
+temperatura padrão do Ar Condicionado, horários em que as janelas deverão ficar abertas, fechadas ou semi-abertas,
+taxa de sincronização entre o firmware e o servidor (baudrate) e a temperatura de banda morta
+do aquecedor, que define quando ele deve ser ligado ou não.
+
+A transição entre páginas é possível ao se clicar no título da página atual.
+
+* **Página de Ações e Monitoramento**
+
+<div align="center">
+   <img src="./Pictures/figura8.PNG" alt="figura8" width="50%" height="20%"/></center>
+</div>
+
+Na página principal (Figura 8), onde se pode, simultaneamente, monitorar sensores e a agir sobre atuadores,
+permite a visualização de estados da porta (Aberta/Fechada/Trancada) e do aquecedor (Ligado/Desligado), da temperatura ambiente (em °C),
+e da velocidade do vento (em Km/h).
+Além disso, também é possível realizar ações sobre o sistema, como abrir a porta e desligar alarme (com inserção de senha),
+controlar a quantidade de luz emitida das lâmpadas, controlar manualmente as posições de cada janela,
+alterar a temperatura do Ar Condicionado, e configurar modo manual ou automático.

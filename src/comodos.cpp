@@ -70,7 +70,7 @@ void iniciaRtc(){
 
 int checkDoor(int call){
   if(call == 0){
-    Serial.println("checkDoor");
+    //Serial.println("checkDoor");
     DateTime now = rtc.now();
     if(digitalRead(PORTAENTRADA) == HIGH){
       doorStatus = FECHADA;
@@ -108,7 +108,7 @@ int checkDoor(int call){
         if(((doorTimer[1] + closeTimeout[0]) <= (int)now.hour())){
           if( ((doorTimer[2] + closeTimeout[1]) <= (int)now.minute()) ){
             if( ((doorTimer[3] + closeTimeout[2]) <= (int)now.second()) ){
-              Serial.println("LIGOU O BUZZER");
+              //Serial.println("LIGOU O BUZZER");
               ligaBuzzer();
             }
           }
@@ -130,31 +130,12 @@ int checkDoor(int call){
   return(0);
 }
 
-int travaPorta(String msg, int type){
-  if(type == 0){
-    if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '1')){
-          //Serial.println("Abrindo trava.");
-          digitalWrite(TRAVAENTRADA, LOW);  // Abre trava
-          return ABERTA;
-    }
-    if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '0')){
-      if(checkDoor(1) == FECHADA){
-        //Serial.println("Fechando trava.");
-        digitalWrite(TRAVAENTRADA, HIGH); // Fecha trava
-        return FECHADA;
-      }else{
-        //Serial.println("Fechar a porta para trava-la");
-        return 2;
-      }
-    }
-  }else 
-  if(type == 1){
+int travaPorta(){
     if(digitalRead(PORTAENTRADA) == ABERTA){
       return 0;
     }else{
       return 1;
     }
-  }
   return 2;
 }
 
@@ -190,7 +171,17 @@ void portaentrada(String msg){
         //Serial.print("Trava Aberta.");
       }
     }else if(msg[3] == ESCRITA){
-      travaPorta(msg,0);
+      if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '0')){
+          // Serial.println("Abrindo trava.");
+          // Serial.println(msg);
+          digitalWrite(TRAVAENTRADA, LOW);  // Abre trava
+      }
+      if((msg[6] == '0') && (msg[7] == '0') && (msg[8] == '0') && (msg[9] == '1')){
+        if(checkDoor(1) == FECHADA){
+          // Serial.println("Fechando trava.");
+          digitalWrite(TRAVAENTRADA, HIGH); // Fecha trava
+        }
+      }
     }
     break;
   }
@@ -244,7 +235,7 @@ void ligaBuzzer(){
 
 void checkBuzzer(){
   DateTime now = rtc.now();
-  Serial.print("controlBuzzer[0]: "); Serial.println(controlBuzzer[0]);
+  //Serial.print("controlBuzzer[0]: "); Serial.println(controlBuzzer[0]);
   if(controlBuzzer[0] == 0){
     if((controlBuzzer[1] <= (now.hour()))){
       if(((controlBuzzer[2]+1) <= now.minute())){
@@ -273,7 +264,7 @@ void checkBuzzer(){
 void desligaBuzzer(){
   DateTime now = rtc.now();
   digitalWrite(BUZZER, LOW);
-  
+
   doorTimer[0] = 0;
   if(controlBuzzer[0] != 1){
     controlBuzzer[0] = 1;
@@ -492,10 +483,10 @@ void saladeestar(String msg){
 
 int controlaVento(){
   int wind = analogRead(VENTO);
-  int tensao = 0;
 
-  tensao = (5 * wind)/1023;
-  wind = (tensao - 0.36206896551)/0.0275862069;
+  //tensao = (5 * wind)/1023;
+  //wind = (tensao - 0.36206896551)/0.0275862069;
+  wind = map(wind, 102,922, 5, 150);
 
   if(wind < 0){
     wind = 0;
@@ -607,10 +598,10 @@ void retorna(){
   retorno[0] = String(0);
   retorno[1] = String(0);
   retorno[2] = String(0);
-  if(travaPorta(String("oi"),1) == 0){
+  if(travaPorta() == 0){
     retorno[3] = String(0);
   }else
-  if(travaPorta(String("oi"),1) == 1){
+  if(travaPorta() == 1){
     retorno[3] = String(1);
   }
 

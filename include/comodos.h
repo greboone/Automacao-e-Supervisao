@@ -53,4 +53,5 @@ void controlaMotores();
 
 int controlaAquecedor();
 int controlaVento();
+int travaPorta();
 void retorna();

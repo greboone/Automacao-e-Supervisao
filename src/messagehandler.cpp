@@ -47,7 +47,7 @@ if (Serial.available() > 0)
       // início é valido?
       if(msg[0] == ':')
       {
-        Serial.println("Caracter de inicio (:) encontrado");
+        // Serial.println("Caracter de inicio (:) encontrado");
 
         // //Cálculo LRC
         // int j = 0;
@@ -139,7 +139,7 @@ if (Serial.available() > 0)
 
         if(msg[10]==hexa[0] && msg[11]==hexa[1]){
           
-          Serial.println("ARDUINO: LRC validado!");
+          Serial.println("LRC validado!");
           
           // mensagem é para mim?
           switch (msg[1])

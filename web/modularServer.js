@@ -229,6 +229,12 @@ async function later(profirmware)
 	sPort.write(profirmware);
 }
 
+async function later2(profirmware)
+{
+	await sleep(400);
+	sPort.write(profirmware);
+}
+
 // servidor ouvindo em 'port'
 var app = http.createServer(function(req, res) {
     
@@ -309,7 +315,7 @@ socket.on('connection', function(client) {
 	var mensagemlrc = mensagem+msglrc;//mensagem c/ lrc
     //sPort.write(mensagemlrc)
     console.log('temperatura de AC da Sala de estar '+ACdeg+' setada');
-	later(mensagemlrc)
+	later2(mensagemlrc)
     //nada a retornar...
   })
 

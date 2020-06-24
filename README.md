@@ -1,5 +1,7 @@
 # Projeto Automação e Supervisão
-Trabalho final da matéria de Automação 2
+Trabalho final da matéria de Automação 2.
+
+Video demonstrativo: https://youtu.be/RSk7XbmkDns
 
 * **Objetivo:**
 
